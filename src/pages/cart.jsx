@@ -11,7 +11,7 @@ function Cart() {
     },
     {
       id: 2,
-      name: "BMW 520d 2013",
+      name: "BMW 520d 2015",
       price: 25.2,
       image: "../cart2.jpg",
     },
