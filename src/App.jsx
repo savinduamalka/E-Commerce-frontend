@@ -3,6 +3,7 @@ import HomePage from "./pages/homePage"
 import Login from "./pages/login"
 import SignUp from "./pages/signup"
 import Contact from "./pages/contact"
+import Cart from "./pages/cart"
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <Route path="/login" element={<Login/>}/>
       <Route path="/signup" element={<SignUp/>}/>
       <Route path="/contact" element={<Contact/>}/>
+      <Route path="/cart" element={<Cart/>}/>
     </Routes>
     </BrowserRouter>
   
