@@ -25,7 +25,7 @@ function Navbar() {
           </li>
           <li className="flex items-center space-x-2">
             <AiOutlineCar size={24} />
-            <a href="/vehicles" className="hover:underline">
+            <a href="/products" className="hover:underline">
               Vehicles
             </a>
           </li>
