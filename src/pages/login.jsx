@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
-import { api } from "../lib/api"; // Assuming you have an api instance set up
+import { api } from "../lib/api";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -18,7 +18,12 @@ function Login() {
     try {
       const response = await api.post("/login", formData);
       alert("Login successful!");
-      navigate("/"); // Redirect to homepage
+      const userRole = response.data.role;
+      if (userRole === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError("Invalid email or password.");
       console.error(err);
