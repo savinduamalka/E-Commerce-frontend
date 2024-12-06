@@ -18,7 +18,8 @@ function Login() {
     try {
       const response = await api.post("/login", formData);
       alert("Login successful!");
-      const userRole = response.data.role;
+      localStorage.setItem("auth_token", response.data.access_token);
+      const userRole = response.data.user.role;
       if (userRole === "admin") {
         navigate("/admin");
       } else {
