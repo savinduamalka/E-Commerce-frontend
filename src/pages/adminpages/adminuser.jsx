@@ -23,7 +23,20 @@ const UserManagement = () => {
     setCurrentUser(user);
   };
 
- 
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      api.delete(`/user/${id}`)
+        .then(() => {
+          setUsers(users.filter((user) => user.id !== id));
+        })
+        .catch(error => {
+          console.error("There was an error deleting the user!", error);
+        });
+    }
+  };
+
+
+
   return (
     <div className="flex h-screen">
       <AdminSidebar />
@@ -53,12 +66,6 @@ const UserManagement = () => {
                   <td className="px-4 py-2 border">{user.role}</td>
                   <td className="px-4 py-2 border">{user.city}</td>
                   <td className="flex justify-center px-4 py-2 space-x-4 border">
-                    <button
-                      className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                      onClick={() => handleEdit(user)}
-                    >
-                      Edit
-                    </button>
                     <button
                       className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700"
                       onClick={() => handleDelete(user.id)}
@@ -96,15 +103,6 @@ const UserManagement = () => {
                     setCurrentUser({ ...currentUser, email: e.target.value })
                   }
                   placeholder="Email"
-                />
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 border rounded"
-                  value={currentUser.password}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, password: e.target.value })
-                  }
-                  placeholder="Password"
                 />
                 <input
                   type="text"
