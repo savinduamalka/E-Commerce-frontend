@@ -6,6 +6,8 @@ import Contact from "./pages/contact";
 import Cart from "./pages/cart";
 import Product from "./pages/products";
 import AdminHome from "./pages/adminpages/adminHome";
+import Category from "./pages/category";
+import UserManagement from "./pages/adminpages/adminuser";
 
 
 function App() {
@@ -20,6 +22,9 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Product />} />
           <Route path="/admin" element={<AdminHome />} />
+          <Route path="/categories" element={<Category/>} />
+          <Route path="/admin/users" element={<UserManagement/>} />
+          <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>
     </>
