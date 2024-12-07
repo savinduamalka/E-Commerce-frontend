@@ -1,48 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../components/adminsidebar";
+import { api } from "../../lib/api";
 
 const UserManagement = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "johndoe@example.com",
-      role: "Admin",
-      city: "New York",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "janesmith@example.com",
-      role: "User",
-      city: "Los Angeles",
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    api.get("/user")
+      .then(response => {
+        console.log(response.data);
+        setUsers(response.data.users); 
+      })
+      .catch(error => {
+        console.error("There was an error fetching the users!", error);
+      });
+  }, []);
 
   const handleEdit = (user) => {
     setIsEditing(true);
     setCurrentUser(user);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((user) => user.id !== id));
-    }
-  };
-
-  const handleSave = () => {
-    setUsers(
-      users.map((user) =>
-        user.id === currentUser.id ? { ...currentUser } : user
-      )
-    );
-    setIsEditing(false);
-    setCurrentUser(null);
-  };
-
+ 
   return (
     <div className="flex h-screen">
       <AdminSidebar />
@@ -50,7 +31,6 @@ const UserManagement = () => {
         <h1 className="mb-6 text-2xl font-bold text-gray-700">
           User Management
         </h1>
-
         <div className="rounded-lg shadow-md">
           <table className="w-full text-left border border-collapse border-gray-200 table-auto">
             <thead className="text-white bg-blue-600">
@@ -63,7 +43,7 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {Array.isArray(users) && users.map((user) => (
                 <tr
                   key={user.id}
                   className="transition-colors hover:bg-gray-100"
