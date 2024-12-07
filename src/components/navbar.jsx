@@ -1,5 +1,6 @@
 import React from "react";
 import { AiFillHome, AiOutlineCar } from "react-icons/ai";
+import { BiCategory } from "react-icons/bi";
 import { FiLogIn, FiShoppingCart } from "react-icons/fi";
 import { MdContactPage } from "react-icons/md";
 
@@ -21,6 +22,12 @@ function Navbar() {
             <AiFillHome size={24} />
             <a href="/" className="hover:underline">
               Home
+            </a>
+          </li>
+          <li className="flex items-center space-x-2">
+            <BiCategory size={24} />
+            <a href="/categories" className="hover:underline">
+              Categories
             </a>
           </li>
           <li className="flex items-center space-x-2">
