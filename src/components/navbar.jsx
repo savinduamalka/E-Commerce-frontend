@@ -53,7 +53,7 @@ function Navbar() {
   }, []);
 
   return (
-    <nav className="py-4 text-white bg-blue-600 shadow-md">
+    <nav className="py-4 text-white bg-black shadow-md">
       <div className="container flex items-center justify-between mx-auto">
         <div className="flex items-center text-2xl font-bold">
           <img

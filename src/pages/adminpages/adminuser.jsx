@@ -10,7 +10,6 @@ const UserManagement = () => {
   useEffect(() => {
     api.get("/user")
       .then(response => {
-        console.log(response.data);
         setUsers(response.data.users); 
       })
       .catch(error => {
@@ -35,7 +34,21 @@ const UserManagement = () => {
     }
   };
 
-
+  const handleSave = () => {
+    api.put(`/user/${currentUser.id}`, currentUser)
+      .then(() => {
+        setUsers(
+          users.map((user) =>
+            user.id === currentUser.id ? { ...currentUser } : user
+          )
+        );
+        setIsEditing(false);
+        setCurrentUser(null);
+      })
+      .catch(error => {
+        console.error("There was an error updating the user!", error);
+      });
+  };
 
   return (
     <div className="flex h-screen">
@@ -66,6 +79,12 @@ const UserManagement = () => {
                   <td className="px-4 py-2 border">{user.role}</td>
                   <td className="px-4 py-2 border">{user.city}</td>
                   <td className="flex justify-center px-4 py-2 space-x-4 border">
+                    <button
+                      className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+                      onClick={() => handleEdit(user)}
+                    >
+                      Edit
+                    </button>
                     <button
                       className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700"
                       onClick={() => handleDelete(user.id)}

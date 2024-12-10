@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"; 
 import Navbar from "../components/navbar";
 
 function HomePage() {
+  const navigate = useNavigate(); 
   const manufacturers = [
     { name: "Toyota", logo: "../toyota-logo.png" },
     { name: "Nissan", logo: "../nissan-logo.png" },
@@ -10,27 +12,58 @@ function HomePage() {
     { name: "Benz", logo: "../benz-logo.png" },
     { name: "Mazda", logo: "../mazda-logo.png" },
     { name: "Honda", logo: "../honda-logo.png" },
+    { name: "Ford", logo: "../ford-logo.png" },
+    { name: "Mitsubishi", logo: "../mitsubishi-logo.png" },
+    { name: "KIA", logo: "../kia-logo.png" },
   ];
 
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+
+    const scroll = () => {
+      if (scrollContainer) {
+        // Move the scroll position slightly to the right
+        scrollContainer.scrollLeft += 1;
+
+        // If the scroll position reaches the end, reset it to the beginning
+        if (
+          scrollContainer.scrollLeft >=
+          scrollContainer.scrollWidth / 2 // Reset when the first copy ends
+        ) {
+          scrollContainer.scrollLeft = 0;
+        }
+      }
+    };
+
+    const interval = setInterval(scroll, 20); // Smooth scrolling speed
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, []);
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-black">
       <Navbar />
-      
-      {/* Hero Section with Gradient Overlay */}
-      <header className="relative py-20 text-white bg-blue-600">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+      <header className="relative py-20 text-white bg-black">
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-800 to-black"></div>
         <div className="container relative z-10 mx-auto text-center">
-          <h1 className="mb-4 text-5xl font-extrabold leading-tight">
-            Why Choose AutoMobile SL?
+          <h1 className="mb-4 text-5xl font-extrabold leading-tight text-gray-100">
+            Welcome to AutoMobile SL
           </h1>
-          <p className="mb-12 text-xl">
-            The best place to find reliable vehicles at the most competitive prices with exceptional service.
+          <p className="mb-12 text-xl text-gray-300">
+            Discover premium vehicles with unbeatable quality and prices.
           </p>
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {["Quality Assurance", "Best Prices", "24/7 Support", "Secure Payment"].map((feature) => (
+            {[
+              "Quality Assurance",
+              "Best Prices",
+              "24/7 Support",
+              "Secure Payment",
+            ].map((feature) => (
               <div
                 key={feature}
-                className="p-6 text-blue-600 transition-shadow duration-300 transform bg-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105"
+                className="p-6 text-white transition-shadow duration-300 transform bg-gray-900 rounded-lg shadow-lg hover:shadow-xl hover:scale-105"
               >
                 <p className="text-lg font-medium">{feature}</p>
               </div>
@@ -39,45 +72,54 @@ function HomePage() {
         </div>
       </header>
 
-      {/* Wallpaper Section with Gradual Blue Mix and Smooth Transition */}
       <section
-        className="relative py-40 bg-center bg-no-repeat bg-cover"
+        className="relative py-40 bg-center bg-cover"
         style={{
           backgroundImage: "url('/home-wallpaper.jpg')",
           backgroundPosition: "center center",
-          backgroundSize: "cover", // Ensures wallpaper is always fully visible
+          backgroundSize: "cover",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-blue-700 to-transparent opacity-80"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-transparent"></div>
         <div className="container relative z-10 mx-auto text-center">
-          <h2 className="mb-4 text-3xl font-semibold text-white">
-            Browse Our Exclusive Collection
+          <h2 className="mb-4 text-4xl font-bold text-gray-100">
+            Explore Our Exclusive Collection
           </h2>
-          <p className="mb-6 text-lg text-white">
-            Explore a wide variety of vehicles from trusted manufacturers.
+          <p className="mb-6 text-lg text-gray-300">
+            Browse a wide variety of vehicles from trusted manufacturers.
           </p>
+          <button
+            onClick={() => navigate("/products")}
+            className="px-6 py-3 text-lg font-semibold text-black bg-yellow-400 rounded hover:bg-yellow-500"
+          >
+            Shop Now
+          </button>
         </div>
       </section>
 
-      {/* Trusted Manufacturers Section with Beautiful Gradient Blue Background */}
-      <section className="py-6 bg-gradient-to-r from-blue-500 to-blue-700">
-        <div className="container mx-auto text-center text-white">
-          <h3 className="mb-4 text-3xl font-semibold">Trusted Manufacturers</h3>
-          <div className="flex pb-4 space-x-10 overflow-x-auto">
-            {manufacturers.map((manufacturer) => (
-              <div key={manufacturer.name} className="flex-shrink-0 px-4">
+      <section className="py-10 bg-black">
+        <div className="container mx-auto text-center text-gray-100">
+          <h3 className="mb-8 text-3xl font-semibold">Trusted Manufacturers</h3>
+          <div
+            ref={scrollRef}
+            className="flex overflow-x-hidden no-scrollbar whitespace-nowrap"
+          >
+            {[...manufacturers, ...manufacturers].map((manufacturer, index) => (
+              <div
+                key={index}
+                className="inline-block px-6 text-center transition-transform duration-300 hover:scale-110"
+              >
                 <img
                   src={manufacturer.logo}
                   alt={manufacturer.name}
-                  className="object-contain h-16 transition-transform duration-300 hover:scale-110"
+                  className="object-contain h-16 mx-auto mb-2"
                 />
-                <p className="mt-2 font-medium text-white">{manufacturer.name}</p>
+                <p className="text-lg">{manufacturer.name}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
     </div>
   );
 }
