@@ -8,6 +8,7 @@ import Product from "./pages/products";
 import AdminHome from "./pages/adminpages/adminHome";
 import Category from "./pages/category";
 import UserManagement from "./pages/adminpages/adminuser";
+import EditUserProfile from "./pages/editUserprofile";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/admin" element={<AdminHome />} />
           <Route path="/categories" element={<Category/>} />
           <Route path="/admin/users" element={<UserManagement/>} />
+          <Route path="/editUserprofile" element={<EditUserProfile />} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>
