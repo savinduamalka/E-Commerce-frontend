@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
+  const [editData, setEditData] = useState(null); 
 
   useEffect(() => {
     fetchProducts();
@@ -34,6 +35,27 @@ const ProductManagement = () => {
         .catch((error) => {
           console.error("There was an error deleting the product!", error);
           toast.error("Failed to delete product!");
+        });
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditData(product); 
+  };
+
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    if (editData) {
+      api
+        .put(`/products/${editData.id}`, editData)
+        .then(() => {
+          toast.success("Product updated successfully!");
+          fetchProducts();
+          setEditData(null); 
+        })
+        .catch((error) => {
+          console.error("There was an error updating the product!", error);
+          toast.error("Failed to update product!");
         });
     }
   };
@@ -77,12 +99,18 @@ const ProductManagement = () => {
                         ? `$${product.discountedPrice}`
                         : "N/A"}
                     </td>
-                    <td className="px-4 py-2 border">{product.category_id}</td>
+                    <td className="px-4 py-2 border">{product.id}</td>
                     <td className="px-4 py-2 border">{product.stock}</td>
                     <td className="px-4 py-2 border">
                       {product.featured ? "Yes" : "No"}
                     </td>
-                    <td className="px-4 py-2 text-center border">
+                    <td className="flex gap-2 px-4 py-2 text-center border">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="px-2 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => handleDelete(product.id)}
                         className="px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600"
@@ -95,6 +123,136 @@ const ProductManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {editData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl overflow-auto max-h-[80vh]">
+              <h2 className="mb-6 text-2xl font-bold text-gray-700">
+                Edit Product
+              </h2>
+              <form onSubmit={handleUpdate}>
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.name}
+                    onChange={(e) =>
+                      setEditData({ ...editData, name: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.description}
+                    onChange={(e) =>
+                      setEditData({ ...editData, description: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Price
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.price}
+                    onChange={(e) =>
+                      setEditData({ ...editData, price: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Discounted Price
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.discountedPrice}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        discountedPrice: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Category ID
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.category_id}
+                    onChange={(e) =>
+                      setEditData({ ...editData, category_id: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.stock}
+                    onChange={(e) =>
+                      setEditData({ ...editData, stock: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Featured
+                  </label>
+                  <select
+                    className="w-full px-3 py-2 border rounded"
+                    value={editData.featured}
+                    onChange={(e) =>
+                      setEditData({ ...editData, featured: e.target.value })
+                    }
+                  >
+                    <option value={true}>Yes</option>
+                    <option value={false}>No</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                  >
+                    Save Changes
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditData(null)}
+                    className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
