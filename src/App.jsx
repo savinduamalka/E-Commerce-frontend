@@ -9,6 +9,7 @@ import AdminHome from "./pages/adminpages/adminHome";
 import Category from "./pages/category";
 import UserManagement from "./pages/adminpages/adminuser";
 import EditUserProfile from "./pages/editUserprofile";
+import CategoryManagement from "./pages/adminpages/adminCategory";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/categories" element={<Category/>} />
           <Route path="/admin/users" element={<UserManagement/>} />
           <Route path="/editUserprofile" element={<EditUserProfile />} />
+          <Route path="/admin/categories" element={<CategoryManagement/>} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>
