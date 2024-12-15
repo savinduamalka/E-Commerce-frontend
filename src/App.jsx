@@ -10,11 +10,13 @@ import Category from "./pages/category";
 import UserManagement from "./pages/adminpages/adminuser";
 import EditUserProfile from "./pages/editUserprofile";
 import CategoryManagement from "./pages/adminpages/adminCategory";
+import { Toaster } from "react-hot-toast";
 
 
 function App() {
   return (
     <>
+    <Toaster />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
