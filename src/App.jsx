@@ -11,6 +11,7 @@ import UserManagement from "./pages/adminpages/adminuser";
 import EditUserProfile from "./pages/editUserprofile";
 import CategoryManagement from "./pages/adminpages/adminCategory";
 import { Toaster } from "react-hot-toast";
+import ProductManagement from "./pages/adminpages/adminProduct";
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/admin/users" element={<UserManagement/>} />
           <Route path="/editUserprofile" element={<EditUserProfile />} />
           <Route path="/admin/categories" element={<CategoryManagement/>} />
+          <Route path="/admin/products" element={<ProductManagement/>} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>
