@@ -7,18 +7,36 @@ const ProductManagement = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = () => {
     api
       .get("/products")
       .then((response) => {
         setProducts(response.data.data);
-        console.log("Products loaded successfully!", response.data.data);
         toast.success("Products loaded successfully!");
       })
       .catch((error) => {
         console.error("There was an error fetching the products!", error);
         toast.error("Failed to load products!");
       });
-  }, []);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      api
+        .delete(`/products/${id}`)
+        .then(() => {
+          toast.success("Product deleted successfully!");
+          fetchProducts();
+        })
+        .catch((error) => {
+          console.error("There was an error deleting the product!", error);
+          toast.error("Failed to delete product!");
+        });
+    }
+  };
 
   return (
     <div className="flex h-screen">
@@ -40,6 +58,7 @@ const ProductManagement = () => {
                 <th className="px-4 py-2 border">Category ID</th>
                 <th className="px-4 py-2 border">Stock</th>
                 <th className="px-4 py-2 border">Featured</th>
+                <th className="px-4 py-2 border">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -58,10 +77,18 @@ const ProductManagement = () => {
                         ? `$${product.discountedPrice}`
                         : "N/A"}
                     </td>
-                    <td className="px-4 py-2 border">{product.id}</td>
+                    <td className="px-4 py-2 border">{product.category_id}</td>
                     <td className="px-4 py-2 border">{product.stock}</td>
                     <td className="px-4 py-2 border">
                       {product.featured ? "Yes" : "No"}
+                    </td>
+                    <td className="px-4 py-2 text-center border">
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
