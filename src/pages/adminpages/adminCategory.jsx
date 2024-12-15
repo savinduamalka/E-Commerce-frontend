@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../components/adminsidebar";
 import { api } from "../../lib/api";
+import { toast } from "react-hot-toast";
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -16,6 +17,7 @@ const CategoryManagement = () => {
       })
       .catch((error) => {
         console.error("There was an error fetching the categories!", error);
+        toast.error("Failed to load categories!");
       });
   }, []);
 
@@ -33,9 +35,11 @@ const CategoryManagement = () => {
         .delete(`/category/${id}`)
         .then(() => {
           setCategories(categories.filter((category) => category.id !== id));
+          toast.success("Category deleted successfully!");
         })
         .catch((error) => {
           console.error("There was an error deleting the category!", error);
+          toast.error("Failed to delete category!");
         });
     }
   };
@@ -44,7 +48,7 @@ const CategoryManagement = () => {
     const { id, name, description, image_url } = currentCategory;
 
     if (!name || !description || !image_url) {
-      alert("All fields are required!");
+      toast.error("All fields are required!");
       return;
     }
 
@@ -63,9 +67,11 @@ const CategoryManagement = () => {
           description: "",
           image_url: "",
         });
+        toast.success("Category updated successfully!");
       })
       .catch((error) => {
         console.error("There was an error updating the category!", error);
+        toast.error("Failed to update category!");
       });
   };
 
