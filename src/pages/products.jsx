@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 
 function Product() {
   const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,6 +18,11 @@ function Product() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addToCart = (product) => {
+    setCart((prevCart) => [...prevCart, product]); 
+    console.log("Cart:", [...cart, product]); 
   };
 
   useEffect(() => {
@@ -65,6 +71,12 @@ function Product() {
                 <p className="mt-2 font-bold text-gray-100">
                   LKR {product.price}M
                 </p>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="w-full px-4 py-2 mt-4 font-semibold text-center text-black transition-colors duration-300 bg-yellow-500 rounded hover:bg-yellow-600"
+                >
+                  Add to Cart
+                </button>
               </div>
             </div>
           ))}
