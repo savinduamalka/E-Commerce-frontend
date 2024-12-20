@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { api } from "../lib/api";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -10,7 +11,7 @@ function Cart() {
     const fetchCartItems = async () => {
       try {
         const response = await api.get("/cart");
-        console.log( response.data);
+        console.log(response.data);
         setCartItems(Array.isArray(response.data.cart.items) ? response.data.cart.items : []);
       } catch (error) {
         console.error("There was an error fetching the cart items!", error);
@@ -20,11 +21,23 @@ function Cart() {
     fetchCartItems();
   }, []);
 
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await api.delete(`/cart/${itemId}`);
+      setCartItems((prevItems) => prevItems.filter(item => item.id !== itemId));
+      toast.success("Item removed from cart successfully!");
+    } catch (error) {
+      console.error("There was an error removing the item from the cart!", error);
+      toast.error("Failed to remove item from cart.");
+    }
+  };
+
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <Navbar />
+      <ToastContainer />
       <div className="container px-4 mx-auto my-12">
         <h1 className="mb-8 text-4xl font-bold text-center text-gray-100">
           Your Cart
@@ -44,7 +57,10 @@ function Cart() {
                 {item.product.name}
               </h2>
               <p className="mb-4 text-xl text-yellow-400">LKR {item.product.price * item.quantity}M</p>
-              <button className="px-6 py-2 text-black bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 focus:outline-none">
+              <button
+                onClick={() => handleRemoveItem(item.id)}
+                className="px-6 py-2 text-black bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 focus:outline-none"
+              >
                 Remove
               </button>
             </div>
