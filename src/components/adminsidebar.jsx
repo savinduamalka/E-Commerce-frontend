@@ -29,9 +29,9 @@ export default function AdminSidebar() {
             </Link>
           </li>
           <li className="p-4 hover:bg-blue-700">
-            <Link to="/admin/cart" className="flex items-center gap-2">
+            <Link to="/admin/orders" className="flex items-center gap-2">
               <FaShoppingCart />
-              Cart
+              Orders
             </Link>
           </li>
         </ul>
