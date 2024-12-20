@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { api } from "../lib/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Product() {
   const [products, setProducts] = useState([]);
@@ -12,6 +14,7 @@ function Product() {
     try {
       const response = await api.get("/products");
       setProducts(response.data.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
       setError("Failed to load products. Please try again later.");
@@ -20,9 +23,20 @@ function Product() {
     }
   };
 
-  const addToCart = (product) => {
-    setCart((prevCart) => [...prevCart, product]); 
-    console.log("Cart:", [...cart, product]); 
+  const addToCart = async (product) => {
+    try {
+      const response = await api.post("/cart", {
+        items: [{ product_id: product.id, quantity: 1 }],
+      });
+      console.log("Cart response:", response.data);
+      setCart((prevCart) => [...prevCart, ...response.data.cart.items]);
+      console.log("Cart:", [...cart, ...response.data.cart.items]);
+      toast.success("Product added to cart successfully!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      setError("Failed to add product to cart. Please try again later.");
+      toast.error("Failed to add product to cart.");
+    }
   };
 
   useEffect(() => {
@@ -32,6 +46,7 @@ function Product() {
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <Navbar />
+      <ToastContainer />
       <div
         className="container px-4 py-12 mx-auto"
         style={{
@@ -41,7 +56,7 @@ function Product() {
         }}
       >
         <h1 className="mb-8 text-4xl font-bold text-center text-gray-100">
-          Products
+          Vehicles
         </h1>
 
         {loading && (
