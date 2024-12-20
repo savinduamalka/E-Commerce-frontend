@@ -32,6 +32,26 @@ function Cart() {
     }
   };
 
+  const handleCheckout = async () => {
+    try {
+      const response = await api.post("/orders", {
+        items: cartItems.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity
+        }))
+      });
+      console.log("Order response:", response.data);
+      toast.success("Order created successfully!");
+
+      // Clear cart items on the backend
+      await api.delete("/cart");
+      setCartItems([]); // Clear cart items on the frontend
+    } catch (error) {
+      console.error("There was an error creating the order!", error);
+      toast.error("Failed to create order.");
+    }
+  };
+
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
@@ -70,7 +90,10 @@ function Cart() {
           <h2 className="text-3xl font-bold text-gray-100">
             Total: LKR {totalPrice}M
           </h2>
-          <button className="px-8 py-3 mt-6 text-lg text-black transition-all duration-300 bg-yellow-400 rounded-lg shadow-lg hover:bg-yellow-500 focus:outline-none">
+          <button
+            onClick={handleCheckout}
+            className="px-8 py-3 mt-6 text-lg text-black transition-all duration-300 bg-yellow-400 rounded-lg shadow-lg hover:bg-yellow-500 focus:outline-none"
+          >
             Checkout
           </button>
         </div>
