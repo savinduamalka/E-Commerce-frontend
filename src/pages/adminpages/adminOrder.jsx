@@ -41,6 +41,19 @@ function OrderManagement() {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        await api.delete(`/orders/${orderId}`);
+        setOrders((prevOrders) => prevOrders.filter(order => order.id !== orderId));
+        toast.success("Order deleted successfully!");
+      } catch (error) {
+        console.error("There was an error deleting the order!", error);
+        toast.error("Failed to delete order.");
+      }
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <div className="fixed w-64 h-screen bg-gray-800">
@@ -95,6 +108,12 @@ function OrderManagement() {
                         <option value="completed">Completed</option>
                         <option value="declined">Declined</option>
                       </select>
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="px-2 py-1 ml-2 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
