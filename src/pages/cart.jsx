@@ -1,29 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+import { api } from "../lib/api";
+
 
 function Cart() {
-  const cartItems = [
-    {
-      id: 1,
-      name: "Toyota Prado J150 2009",
-      price: 30.8,
-      image: "../cart1.jpg",
-    },
-    {
-      id: 2,
-      name: "BMW 520d 2015",
-      price: 25.2,
-      image: "../cart2.jpg",
-    },
-    {
-      id: 3,
-      name: "Nissan Xtrail 2016",
-      price: 15.2,
-      image: "../cart3.jpg",
-    },
-  ];
+  const [cartItems, setCartItems] = useState([]);
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const response = await api.get("/cart");
+        console.log( response.data);
+        setCartItems(Array.isArray(response.data.cart.items) ? response.data.cart.items : []);
+      } catch (error) {
+        console.error("There was an error fetching the cart items!", error);
+      }
+    };
+
+    fetchCartItems();
+  }, []);
+
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -39,14 +36,14 @@ function Cart() {
               className="flex flex-col items-center p-6 transition-transform duration-300 transform bg-gray-900 rounded-lg shadow-lg hover:scale-105"
             >
               <img
-                src={item.image}
-                alt={item.name}
+                src={item.product.imageUrl}
+                alt={item.product.name}
                 className="object-cover w-full h-48 mb-4 rounded-lg"
               />
               <h2 className="mb-2 text-2xl font-semibold text-gray-100">
-                {item.name}
+                {item.product.name}
               </h2>
-              <p className="mb-4 text-xl text-yellow-400">LKR {item.price}M</p>
+              <p className="mb-4 text-xl text-yellow-400">LKR {item.product.price * item.quantity}M</p>
               <button className="px-6 py-2 text-black bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 focus:outline-none">
                 Remove
               </button>
