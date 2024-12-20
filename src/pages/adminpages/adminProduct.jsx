@@ -99,7 +99,7 @@ const ProductManagement = () => {
                         ? `$${product.discountedPrice}`
                         : "N/A"}
                     </td>
-                    <td className="px-4 py-2 border">{product.id}</td>
+                    <td className="px-4 py-2 border">{product.categoryId}</td>
                     <td className="px-4 py-2 border">{product.stock}</td>
                     <td className="px-4 py-2 border">
                       {product.featured ? "Yes" : "No"}
@@ -196,9 +196,9 @@ const ProductManagement = () => {
                   <input
                     type="text"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.category_id}
+                    value={editData.categoryId}
                     onChange={(e) =>
-                      setEditData({ ...editData, category_id: e.target.value })
+                      setEditData({ ...editData, categoryId: e.target.value })
                     }
                   />
                 </div>

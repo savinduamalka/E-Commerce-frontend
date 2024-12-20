@@ -61,7 +61,7 @@ function Product() {
               className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105"
             >
               <img
-                src={product.image_url || "https://via.placeholder.com/150"}
+                src={product.imageUrl || "https://via.placeholder.com/150"}
                 alt={product.name}
                 className="object-cover w-full h-40"
               />
