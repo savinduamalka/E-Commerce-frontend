@@ -2,10 +2,21 @@ import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../components/adminsidebar";
 import { api } from "../../lib/api";
 import { toast } from "react-hot-toast";
+import { FaPlus } from "react-icons/fa"; // Import the icon
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
-  const [editData, setEditData] = useState(null); 
+  const [editData, setEditData] = useState(null);
+  const [isCreating, setIsCreating] = useState(false); // State for creating a new product
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    description: "",
+    price: "",
+    discountedPrice: "",
+    categoryId: "",
+    stock: "",
+    image: "",
+  });
 
   useEffect(() => {
     fetchProducts();
@@ -40,7 +51,7 @@ const ProductManagement = () => {
   };
 
   const handleEdit = (product) => {
-    setEditData(product); 
+    setEditData(product);
   };
 
   const handleUpdate = (e) => {
@@ -51,13 +62,60 @@ const ProductManagement = () => {
         .then(() => {
           toast.success("Product updated successfully!");
           fetchProducts();
-          setEditData(null); 
+          setEditData(null);
         })
         .catch((error) => {
           console.error("There was an error updating the product!", error);
           toast.error("Failed to update product!");
         });
     }
+  };
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    const {
+      name,
+      description,
+      price,
+      discountedPrice,
+      categoryId,
+      stock,
+      image,
+    } = newProduct;
+
+    if (!name || !description || !price || !categoryId || !stock || !image) {
+      toast.error("All fields are required!");
+      return;
+    }
+
+    api
+      .post("/products", {
+        name,
+        description,
+        price,
+        discountedPrice,
+        categoryId,
+        stock,
+        image,
+      })
+      .then((response) => {
+        setProducts([...products, response.data.data]);
+        setNewProduct({
+          name: "",
+          description: "",
+          price: "",
+          discountedPrice: "",
+          categoryId: "",
+          stock: "",
+          image: "",
+        });
+        setIsCreating(false);
+        toast.success("Product created successfully!");
+      })
+      .catch((error) => {
+        console.error("There was an error creating the product!", error);
+        toast.error("Failed to create product!");
+      });
   };
 
   return (
@@ -67,6 +125,18 @@ const ProductManagement = () => {
         <h1 className="mb-6 text-2xl font-bold text-gray-700">
           Product Management
         </h1>
+
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => {
+              setIsCreating(true);
+              setEditData(null);
+            }}
+            className="flex items-center px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
+          >
+            <FaPlus className="mr-2" /> Create Product
+          </button>
+        </div>
 
         <div className="rounded-lg shadow-md">
           <table className="w-full text-left border border-collapse border-gray-200 table-auto">
@@ -79,7 +149,7 @@ const ProductManagement = () => {
                 <th className="px-4 py-2 border">Discounted Price</th>
                 <th className="px-4 py-2 border">Category ID</th>
                 <th className="px-4 py-2 border">Stock</th>
-                <th className="px-4 py-2 border">Featured</th>
+                <th className="px-4 py-2 border">Image</th>
                 <th className="px-4 py-2 border">Actions</th>
               </tr>
             </thead>
@@ -102,7 +172,11 @@ const ProductManagement = () => {
                     <td className="px-4 py-2 border">{product.categoryId}</td>
                     <td className="px-4 py-2 border">{product.stock}</td>
                     <td className="px-4 py-2 border">
-                      {product.featured ? "Yes" : "No"}
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="object-cover w-16 h-16"
+                      />
                     </td>
                     <td className="flex gap-2 px-4 py-2 text-center border">
                       <button
@@ -124,13 +198,13 @@ const ProductManagement = () => {
           </table>
         </div>
 
-        {editData && (
+        {(editData || isCreating) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl overflow-auto max-h-[80vh]">
               <h2 className="mb-6 text-2xl font-bold text-gray-700">
-                Edit Product
+                {editData ? "Edit Product" : "Create Product"}
               </h2>
-              <form onSubmit={handleUpdate}>
+              <form onSubmit={editData ? handleUpdate : handleCreate}>
                 <div className="mb-4">
                   <label className="block mb-1 text-sm font-medium text-gray-700">
                     Name
@@ -138,9 +212,11 @@ const ProductManagement = () => {
                   <input
                     type="text"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.name}
+                    value={editData ? editData.name : newProduct.name}
                     onChange={(e) =>
-                      setEditData({ ...editData, name: e.target.value })
+                      editData
+                        ? setEditData({ ...editData, name: e.target.value })
+                        : setNewProduct({ ...newProduct, name: e.target.value })
                     }
                   />
                 </div>
@@ -151,9 +227,19 @@ const ProductManagement = () => {
                   </label>
                   <textarea
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.description}
+                    value={
+                      editData ? editData.description : newProduct.description
+                    }
                     onChange={(e) =>
-                      setEditData({ ...editData, description: e.target.value })
+                      editData
+                        ? setEditData({
+                            ...editData,
+                            description: e.target.value,
+                          })
+                        : setNewProduct({
+                            ...newProduct,
+                            description: e.target.value,
+                          })
                     }
                   />
                 </div>
@@ -165,9 +251,14 @@ const ProductManagement = () => {
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.price}
+                    value={editData ? editData.price : newProduct.price}
                     onChange={(e) =>
-                      setEditData({ ...editData, price: e.target.value })
+                      editData
+                        ? setEditData({ ...editData, price: e.target.value })
+                        : setNewProduct({
+                            ...newProduct,
+                            price: e.target.value,
+                          })
                     }
                   />
                 </div>
@@ -179,12 +270,21 @@ const ProductManagement = () => {
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.discountedPrice}
+                    value={
+                      editData
+                        ? editData.discountedPrice
+                        : newProduct.discountedPrice
+                    }
                     onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        discountedPrice: e.target.value,
-                      })
+                      editData
+                        ? setEditData({
+                            ...editData,
+                            discountedPrice: e.target.value,
+                          })
+                        : setNewProduct({
+                            ...newProduct,
+                            discountedPrice: e.target.value,
+                          })
                     }
                   />
                 </div>
@@ -196,9 +296,19 @@ const ProductManagement = () => {
                   <input
                     type="text"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.categoryId}
+                    value={
+                      editData ? editData.categoryId : newProduct.categoryId
+                    }
                     onChange={(e) =>
-                      setEditData({ ...editData, categoryId: e.target.value })
+                      editData
+                        ? setEditData({
+                            ...editData,
+                            categoryId: e.target.value,
+                          })
+                        : setNewProduct({
+                            ...newProduct,
+                            categoryId: e.target.value,
+                          })
                     }
                   />
                 </div>
@@ -210,27 +320,35 @@ const ProductManagement = () => {
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.stock}
+                    value={editData ? editData.stock : newProduct.stock}
                     onChange={(e) =>
-                      setEditData({ ...editData, stock: e.target.value })
+                      editData
+                        ? setEditData({ ...editData, stock: e.target.value })
+                        : setNewProduct({
+                            ...newProduct,
+                            stock: e.target.value,
+                          })
                     }
                   />
                 </div>
 
                 <div className="mb-4">
                   <label className="block mb-1 text-sm font-medium text-gray-700">
-                    Featured
+                    Image URL
                   </label>
-                  <select
+                  <input
+                    type="text"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData.featured}
+                    value={editData ? editData.image : newProduct.image}
                     onChange={(e) =>
-                      setEditData({ ...editData, featured: e.target.value })
+                      editData
+                        ? setEditData({ ...editData, image: e.target.value })
+                        : setNewProduct({
+                            ...newProduct,
+                            image: e.target.value,
+                          })
                     }
-                  >
-                    <option value={true}>Yes</option>
-                    <option value={false}>No</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="flex gap-4">
@@ -238,12 +356,15 @@ const ProductManagement = () => {
                     type="submit"
                     className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
                   >
-                    Save Changes
+                    {editData ? "Save Changes" : "Create"}
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => setEditData(null)}
+                    onClick={() => {
+                      setEditData(null);
+                      setIsCreating(false);
+                    }}
                     className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600"
                   >
                     Cancel
