@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { api } from "../lib/api";
 import Navbar from "../components/navbar";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ function SignUp() {
 
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -28,6 +30,7 @@ function SignUp() {
       const response = await api.post("/register", formData);
       alert("User created successfully!");
       console.log(response.data);
+      navigate("/login");
     } catch (err) {
       setError("An error occurred while creating the account.");
       console.error(err);
@@ -79,7 +82,7 @@ function SignUp() {
                 onChange={handleChange}
               />
             </div>
-            <div className="mb-4 relative">
+            <div className="relative mb-4">
               <label
                 htmlFor="password"
                 className="block font-medium text-gray-300"
