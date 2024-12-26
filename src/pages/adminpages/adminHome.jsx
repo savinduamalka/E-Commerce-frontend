@@ -27,7 +27,7 @@ export default function AdminHome() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSidebar />
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 ml-64">
         <h1 className="text-3xl font-bold text-gray-800">Welcome, Admin!</h1>
         <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-4">
           <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg">

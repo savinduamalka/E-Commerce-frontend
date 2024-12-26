@@ -56,9 +56,7 @@ function OrderManagement() {
 
   return (
     <div className="flex h-screen">
-      <div className="fixed w-64 h-screen bg-gray-800">
-        <AdminSidebar />
-      </div>
+      <AdminSidebar />
       <div className="flex-1 p-6 ml-64 bg-gray-50">
         <h1 className="mb-6 text-2xl font-bold text-gray-700">Order Management</h1>
 

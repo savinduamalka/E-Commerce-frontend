@@ -108,7 +108,7 @@ const CategoryManagement = () => {
   return (
     <div className="flex h-screen">
       <AdminSidebar />
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-6 ml-64 bg-gray-50">
         <h1 className="mb-6 text-2xl font-bold text-gray-700">
           Category Management
         </h1>

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function AdminSidebar() {
   return (
-    <aside className="w-64 h-screen text-white bg-blue-800">
+    <aside className="fixed w-64 h-screen text-white bg-blue-800">
       <div className="p-4 text-xl font-bold text-center border-b border-blue-600">
         <Link to="/admin" className="hover:underline">Admin Dashboard</Link>
       </div>
