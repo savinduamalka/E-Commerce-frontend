@@ -12,7 +12,7 @@ const CategoryManagement = () => {
   const [newCategory, setNewCategory] = useState({
     name: "",
     description: "",
-    image_url: "",
+    image: "",
   });
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const CategoryManagement = () => {
   const handleEdit = (category) => {
     setCurrentCategory({
       ...category,
-      image_url: category.image_url || category.imageUrl,
+      image: category.image || category.imageUrl,
     });
     setIsEditing(true);
     setIsCreating(false);  
@@ -53,19 +53,19 @@ const CategoryManagement = () => {
   };
 
   const handleSave = () => {
-    const { id, name, description, image_url } = currentCategory;
+    const { id, name, description, image } = currentCategory;
 
-    if (!name || !description || !image_url) {
+    if (!name || !description || !image) {
       toast.error("All fields are required!");
       return;
     }
 
     api
-      .put(`/category/${id}`, { name, description, image_url })
+      .put(`/category/${id}`, { name, description, image })
       .then((response) => {
         setCategories(
           categories.map((category) =>
-            category.id === id ? { ...response.data.category, image_url } : category
+            category.id === id ? { ...response.data.category, image } : category
           )
         );
         setIsEditing(false);
@@ -73,7 +73,7 @@ const CategoryManagement = () => {
           id: "",
           name: "",
           description: "",
-          image_url: "",
+          image: "",
         });
         toast.success("Category updated successfully!");
       })
@@ -84,18 +84,18 @@ const CategoryManagement = () => {
   };
 
   const handleCreate = () => {
-    const { name, description, image_url } = newCategory;
+    const { name, description, image } = newCategory;
 
-    if (!name || !description || !image_url) {
+    if (!name || !description || !image) {
       toast.error("All fields are required!");
       return;
     }
 
     api
-      .post("/category", { name, description, image_url })
+      .post("/category", { name, description, image })
       .then((response) => {
         setCategories([...categories, response.data.category]);
-        setNewCategory({ name: "", description: "", image_url: "" });
+        setNewCategory({ name: "", description: "", image: "" });
         setIsCreating(false); 
         toast.success("Category created successfully!");
       })
@@ -129,9 +129,10 @@ const CategoryManagement = () => {
           <table className="w-full text-left border border-collapse border-gray-200 table-auto">
             <thead className="text-white bg-blue-600">
               <tr>
+                <th className="px-4 py-2 border">ID</th>
                 <th className="px-4 py-2 border">Name</th>
                 <th className="px-4 py-2 border">Description</th>
-                <th className="px-4 py-2 border">Image URL</th>
+                <th className="px-4 py-2 border">Image</th>
                 <th className="px-4 py-2 border">Actions</th>
               </tr>
             </thead>
@@ -142,10 +143,15 @@ const CategoryManagement = () => {
                     key={category.id}
                     className="transition-colors hover:bg-gray-100"
                   >
+                    <td className="px-4 py-2 border">{category.id}</td>
                     <td className="px-4 py-2 border">{category.name}</td>
                     <td className="px-4 py-2 border">{category.description}</td>
                     <td className="px-4 py-2 border">
-                      {category.image_url || category.imageUrl}
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="object-cover w-16 h-16"
+                      />
                     </td>
                     <td className="flex justify-center px-4 py-2 space-x-4 border">
                       <button
@@ -205,14 +211,14 @@ const CategoryManagement = () => {
                 <input
                   type="text"
                   className="w-full px-4 py-2 border rounded"
-                  value={isEditing ? currentCategory.image_url : newCategory.image_url}
+                  value={isEditing ? currentCategory.image : newCategory.image}
                   onChange={(e) =>
                     isEditing
                       ? setCurrentCategory({
                           ...currentCategory,
-                          image_url: e.target.value,
+                          image: e.target.value,
                         })
-                      : setNewCategory({ ...newCategory, image_url: e.target.value })
+                      : setNewCategory({ ...newCategory, image: e.target.value })
                   }
                   placeholder="Image URL"
                 />
@@ -227,9 +233,9 @@ const CategoryManagement = () => {
                       id: "",
                       name: "",
                       description: "",
-                      image_url: "",
+                      image: "",
                     });
-                    setNewCategory({ name: "", description: "", image_url: "" });
+                    setNewCategory({ name: "", description: "", image: "" });
                   }}
                 >
                   Cancel

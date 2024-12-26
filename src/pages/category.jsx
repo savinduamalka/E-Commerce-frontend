@@ -10,7 +10,6 @@ function Category() {
   const getCategory = async () => {
     try {
       const response = await api.get("/categories");
-      console.log(response.data);
       setCategories(response.data.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -56,7 +55,7 @@ function Category() {
               className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105"
             >
               <img
-                src={category.imageUrl || "https://via.placeholder.com/150"}
+                src={category.image || "https://via.placeholder.com/150"}
                 alt={category.name}
                 className="object-cover w-full h-40"
               />
