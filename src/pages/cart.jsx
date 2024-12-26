@@ -69,7 +69,7 @@ function Cart() {
               className="flex flex-col items-center p-6 transition-transform duration-300 transform bg-gray-900 rounded-lg shadow-lg hover:scale-105"
             >
               <img
-                src={item.product.imageUrl}
+                src={item.product.image}
                 alt={item.product.name}
                 className="object-cover w-full h-48 mb-4 rounded-lg"
               />
