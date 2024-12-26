@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { api } from "../lib/api";
-import { ToastContainer, toast } from "react-toastify";
-
 
 function Product() {
   const [products, setProducts] = useState([]);
