@@ -17,16 +17,28 @@ const ProductManagement = () => {
     stock: "",
     image: "",
   });
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 12,
+    total: 0
+  });
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = () => {
+  const fetchProducts = (page = 1) => {
     api
-      .get("/products")
+      .get(`/products?page=${page}`)
       .then((response) => {
         setProducts(response.data.data);
+        setPagination({
+          current_page: response.data.meta.current_page,
+          last_page: response.data.meta.last_page,
+          per_page: response.data.meta.per_page,
+          total: response.data.meta.total
+        });
         toast.success("Products loaded successfully!");
       })
       .catch((error) => {
@@ -163,10 +175,10 @@ const ProductManagement = () => {
                     <td className="px-4 py-2 border">{product.id}</td>
                     <td className="px-4 py-2 border">{product.name}</td>
                     <td className="px-4 py-2 border">{product.description}</td>
-                    <td className="px-4 py-2 border">${product.price}</td>
+                    <td className="px-4 py-2 border">{product.price}</td>
                     <td className="px-4 py-2 border">
                       {product.discountedPrice
-                        ? `$${product.discountedPrice}`
+                        ? `${product.discountedPrice}`
                         : "N/A"}
                     </td>
                     <td className="px-4 py-2 border">{product.categoryId}</td>
@@ -198,10 +210,84 @@ const ProductManagement = () => {
           </table>
         </div>
 
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between px-4 py-3 mt-4 bg-white border-t border-gray-200 sm:px-6">
+          <div className="flex justify-between flex-1 sm:hidden">
+            <button
+              onClick={() => fetchProducts(pagination.current_page - 1)}
+              disabled={pagination.current_page === 1}
+              className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
+                pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => fetchProducts(pagination.current_page + 1)}
+              disabled={pagination.current_page === pagination.last_page}
+              className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
+                pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Showing{" "}
+                <span className="font-medium">
+                  {(pagination.current_page - 1) * pagination.per_page + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium">
+                  {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                </span>{" "}
+                of <span className="font-medium">{pagination.total}</span> results
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
+                <button
+                  onClick={() => fetchProducts(pagination.current_page - 1)}
+                  disabled={pagination.current_page === 1}
+                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md ${
+                    pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                  }`}
+                >
+                  Previous
+                </button>
+                {[...Array(pagination.last_page)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => fetchProducts(index + 1)}
+                    className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                      pagination.current_page === index + 1
+                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => fetchProducts(pagination.current_page + 1)}
+                  disabled={pagination.current_page === pagination.last_page}
+                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md ${
+                    pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                  }`}
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+
         {(editData || isCreating) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl overflow-auto max-h-[80vh]">
-              <h2 className="mb-6 text-2xl font-bold text-gray-700">
+            <div className="w-full max-w-lg p-6 bg-white rounded-lg">
+              <h2 className="mb-4 text-xl font-bold">
                 {editData ? "Edit Product" : "Create Product"}
               </h2>
               <form onSubmit={editData ? handleUpdate : handleCreate}>
@@ -227,15 +313,10 @@ const ProductManagement = () => {
                   </label>
                   <textarea
                     className="w-full px-3 py-2 border rounded"
-                    value={
-                      editData ? editData.description : newProduct.description
-                    }
+                    value={editData ? editData.description : newProduct.description}
                     onChange={(e) =>
                       editData
-                        ? setEditData({
-                            ...editData,
-                            description: e.target.value,
-                          })
+                        ? setEditData({ ...editData, description: e.target.value })
                         : setNewProduct({
                             ...newProduct,
                             description: e.target.value,
@@ -255,10 +336,7 @@ const ProductManagement = () => {
                     onChange={(e) =>
                       editData
                         ? setEditData({ ...editData, price: e.target.value })
-                        : setNewProduct({
-                            ...newProduct,
-                            price: e.target.value,
-                          })
+                        : setNewProduct({ ...newProduct, price: e.target.value })
                     }
                   />
                 </div>
@@ -270,11 +348,7 @@ const ProductManagement = () => {
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded"
-                    value={
-                      editData
-                        ? editData.discountedPrice
-                        : newProduct.discountedPrice
-                    }
+                    value={editData ? editData.discountedPrice : newProduct.discountedPrice}
                     onChange={(e) =>
                       editData
                         ? setEditData({

@@ -4,23 +4,35 @@ import { api } from "../../lib/api";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 12,
+    total: 0
+  });
+
+  const fetchUsers = async (page = 1) => {
+    try {
+      const response = await api.get(`/user?page=${page}`);
+      const usersData = response.data.data || [];
+      const meta = {
+        current_page: response.data.current_page,
+        last_page: response.data.last_page,
+        per_page: response.data.per_page,
+        total: response.data.total
+      };
+
+      setUsers(usersData);
+      setPagination(meta);
+    } catch (error) {
+      console.error("There was an error fetching the users!", error);
+    }
+  };
 
   useEffect(() => {
-    api.get("/user")
-      .then(response => {
-        setUsers(response.data.users); 
-      })
-      .catch(error => {
-        console.error("There was an error fetching the users!", error);
-      });
+    fetchUsers();
   }, []);
-
-  const handleEdit = (user) => {
-    setIsEditing(true);
-    setCurrentUser(user);
-  };
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
@@ -34,30 +46,14 @@ const UserManagement = () => {
     }
   };
 
-  const handleSave = () => {
-    api.put(`/user/${currentUser.id}`, currentUser)
-      .then(() => {
-        setUsers(
-          users.map((user) =>
-            user.id === currentUser.id ? { ...currentUser } : user
-          )
-        );
-        setIsEditing(false);
-        setCurrentUser(null);
-      })
-      .catch(error => {
-        console.error("There was an error updating the user!", error);
-      });
-  };
-
   return (
     <div className="flex h-screen">
       <AdminSidebar />
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-6 ml-64 bg-gray-50">
         <h1 className="mb-6 text-2xl font-bold text-gray-700">
           User Management
         </h1>
-        <div className="rounded-lg shadow-md">
+        <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="w-full text-left border border-collapse border-gray-200 table-auto">
             <thead className="text-white bg-blue-600">
               <tr>
@@ -80,12 +76,6 @@ const UserManagement = () => {
                   <td className="px-4 py-2 border">{user.city}</td>
                   <td className="flex justify-center px-4 py-2 space-x-4 border">
                     <button
-                      className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                      onClick={() => handleEdit(user)}
-                    >
-                      Edit
-                    </button>
-                    <button
                       className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700"
                       onClick={() => handleDelete(user.id)}
                     >
@@ -98,70 +88,79 @@ const UserManagement = () => {
           </table>
         </div>
 
-        {isEditing && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="p-8 bg-white rounded-lg shadow-lg w-96">
-              <h2 className="mb-4 text-lg font-bold text-gray-700">
-                Edit User
-              </h2>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 border rounded"
-                  value={currentUser.name}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, name: e.target.value })
-                  }
-                  placeholder="Name"
-                />
-                <input
-                  type="email"
-                  className="w-full px-4 py-2 border rounded"
-                  value={currentUser.email}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, email: e.target.value })
-                  }
-                  placeholder="Email"
-                />
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 border rounded"
-                  value={currentUser.role}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, role: e.target.value })
-                  }
-                  placeholder="Role"
-                />
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 border rounded"
-                  value={currentUser.city}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, city: e.target.value })
-                  }
-                  placeholder="City"
-                />
-              </div>
-              <div className="flex justify-end mt-6 space-x-4">
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between px-4 py-3 mt-4 bg-white border-t border-gray-200 sm:px-6">
+          <div className="flex justify-between flex-1 sm:hidden">
+            <button
+              onClick={() => fetchUsers(pagination.current_page - 1)}
+              disabled={pagination.current_page === 1}
+              className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
+                pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => fetchUsers(pagination.current_page + 1)}
+              disabled={pagination.current_page === pagination.last_page}
+              className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
+                pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Showing{" "}
+                <span className="font-medium">
+                  {(pagination.current_page - 1) * pagination.per_page + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium">
+                  {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                </span>{" "}
+                of <span className="font-medium">{pagination.total}</span> results
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
                 <button
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setCurrentUser(null);
-                  }}
+                  onClick={() => fetchUsers(pagination.current_page - 1)}
+                  disabled={pagination.current_page === 1}
+                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md ${
+                    pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                  }`}
                 >
-                  Cancel
+                  Previous
                 </button>
+                {[...Array(pagination.last_page)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => fetchUsers(index + 1)}
+                    className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                      pagination.current_page === index + 1
+                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
                 <button
-                  className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-                  onClick={handleSave}
+                  onClick={() => fetchUsers(pagination.current_page + 1)}
+                  disabled={pagination.current_page === pagination.last_page}
+                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md ${
+                    pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                  }`}
                 >
-                  Save
+                  Next
                 </button>
-              </div>
+              </nav>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
