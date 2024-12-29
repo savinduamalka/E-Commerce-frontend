@@ -57,7 +57,7 @@ function OrderManagement() {
       const response = await api.put(`/orders/${orderId}/status`, { status });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? response.data.order : order
+          order.id === orderId ? { ...order, status } : order
         )
       );
       toast.success(response.data.message);
@@ -111,11 +111,11 @@ function OrderManagement() {
                     <td className="px-4 py-2 border">{order.user_id}</td>
                     <td className="px-4 py-2 border">{order.status}</td>
                     <td className="px-4 py-2 border">
-                      LKR {order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
+                      LKR {order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
                     </td>
                     <td className="px-4 py-2 border">
                       <ul>
-                        {order.items.map((item) => (
+                        {order.items?.map((item) => (
                           <li key={item.id}>
                             {item.product.name}
                           </li>
