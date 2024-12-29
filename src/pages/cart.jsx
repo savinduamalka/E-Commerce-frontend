@@ -67,7 +67,7 @@ function Cart() {
     }
   };
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -95,7 +95,7 @@ function Cart() {
                   <h2 className="mb-2 text-2xl font-semibold text-gray-100">
                     {item.product.name}
                   </h2>
-                  <p className="mb-4 text-xl text-yellow-400">LKR {item.product.price * item.quantity}M</p>
+                  <p className="mb-4 text-xl text-yellow-400">LKR {item.price * item.quantity}M</p>
                   <button
                     onClick={() => handleRemoveItem(item.id)}
                     className="px-6 py-2 text-black bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 focus:outline-none"

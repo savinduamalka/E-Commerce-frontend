@@ -13,18 +13,24 @@ function Product() {
     current_page: 1,
     last_page: 1,
     per_page: 12,
-    total: 0
+    total: 0,
   });
 
   const getProducts = async (page = 1) => {
     try {
       const response = await api.get(`/products?page=${page}`);
-      setProducts(response.data.data);
+      setProducts(
+        response.data.data.map((product) => ({
+          ...product,
+          discountedPrice: product.discountedPrice, // Adding discountedPrice
+          stock: product.stock, // Adding stock
+        }))
+      );
       setPagination({
         current_page: response.data.meta.current_page,
         last_page: response.data.meta.last_page,
         per_page: response.data.meta.per_page,
-        total: response.data.meta.total
+        total: response.data.meta.total,
       });
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -94,12 +100,36 @@ function Product() {
               <div className="p-4 text-gray-100">
                 <h3 className="text-xl font-semibold">{product.name}</h3>
                 <p className="mt-2 text-gray-400">{product.description}</p>
-                <p className="mt-2 font-bold text-gray-100">
-                  LKR {product.price}M
+                <div className="mt-2">
+                  {product.discountedPrice ? (
+                    <>
+                      <p className="text-gray-100 line-through">
+                        LKR {product.price}M
+                      </p>
+                      <p className="font-bold text-green-400">
+                        LKR {product.discountedPrice}M
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-bold text-gray-100">
+                      LKR {product.price}M
+                    </p>
+                  )}
+                </div>
+
+                <p
+                  className={`text-sm ${
+                    product.stock > 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {product.stock > 0
+                    ? `In Stock: ${product.stock}`
+                    : "Out of Stock"}
                 </p>
                 <button
                   onClick={() => addToCart(product)}
                   className="w-full px-4 py-2 mt-4 font-semibold text-center text-black transition-colors duration-300 bg-yellow-500 rounded hover:bg-yellow-600"
+                  disabled={product.stock <= 0}
                 >
                   Add to Cart
                 </button>
@@ -115,7 +145,9 @@ function Product() {
               onClick={() => getProducts(pagination.current_page - 1)}
               disabled={pagination.current_page === 1}
               className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
-                pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-700"
+                pagination.current_page === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-700"
               }`}
             >
               Previous
@@ -124,7 +156,9 @@ function Product() {
               onClick={() => getProducts(pagination.current_page + 1)}
               disabled={pagination.current_page === pagination.last_page}
               className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
-                pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-700"
+                pagination.current_page === pagination.last_page
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-700"
               }`}
             >
               Next
@@ -139,9 +173,13 @@ function Product() {
                 </span>{" "}
                 to{" "}
                 <span className="font-medium">
-                  {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                  {Math.min(
+                    pagination.current_page * pagination.per_page,
+                    pagination.total
+                  )}
                 </span>{" "}
-                of <span className="font-medium">{pagination.total}</span> results
+                of <span className="font-medium">{pagination.total}</span>{" "}
+                results
               </p>
             </div>
             <div>
@@ -150,7 +188,9 @@ function Product() {
                   onClick={() => getProducts(pagination.current_page - 1)}
                   disabled={pagination.current_page === 1}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-l-md ${
-                    pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-700"
+                    pagination.current_page === 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-700"
                   }`}
                 >
                   Previous
@@ -172,7 +212,9 @@ function Product() {
                   onClick={() => getProducts(pagination.current_page + 1)}
                   disabled={pagination.current_page === pagination.last_page}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-r-md ${
-                    pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-700"
+                    pagination.current_page === pagination.last_page
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-700"
                   }`}
                 >
                   Next
