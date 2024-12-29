@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import Navbar from "../components/navbar";
+import { Toaster, toast } from "react-hot-toast";
 
 function EditUserProfile() {
   const [formData, setFormData] = useState({
@@ -31,15 +32,17 @@ function EditUserProfile() {
     e.preventDefault();
     try {
       await api.put("/user/me", { name: formData.name, city: formData.city });
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast.error("Failed to update profile. Please try again later.");
     }
   };
 
   return (
     <>
       <Navbar />
+      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{

@@ -61,10 +61,10 @@ export default function AdminHome() {
             <div className="flex items-center justify-between">
               <FaShoppingCart className="text-3xl text-red-600" />
               <span className="text-4xl font-bold text-gray-800">
-                {stats.total_cart_items}
+                {stats.total_orders}
               </span>
             </div>
-            <p className="mt-2 text-gray-600">Items in Cart</p>
+            <p className="mt-2 text-gray-600">Orders</p>
           </div>
         </div>
       </main>

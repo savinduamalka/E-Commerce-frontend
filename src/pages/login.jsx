@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
 import { api } from "../lib/api";
+import { Toaster, toast } from "react-hot-toast";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -22,7 +23,7 @@ function Login() {
     e.preventDefault();
     try {
       const response = await api.post("/login", formData);
-      alert("Login successful!");
+      toast.success("Login successful!");
       localStorage.setItem("auth_token", response.data.access_token);
       const userRole = response.data.user.role;
       if (userRole === "admin") {
@@ -33,12 +34,14 @@ function Login() {
     } catch (err) {
       setError("Invalid email or password.");
       console.error(err);
+      toast.error("Invalid email or password.");
     }
   };
 
   return (
     <>
       <Navbar />
+      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{

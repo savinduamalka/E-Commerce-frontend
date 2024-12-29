@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { api } from "../lib/api";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
+import { Toaster, toast } from "react-hot-toast";
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -28,18 +29,20 @@ function SignUp() {
     e.preventDefault();
     try {
       const response = await api.post("/register", formData);
-      alert("User created successfully!");
+      toast.success("User created successfully!");
       console.log(response.data);
       navigate("/login");
     } catch (err) {
       setError("An error occurred while creating the account.");
       console.error(err);
+      toast.error("An error occurred while creating the account.");
     }
   };
 
   return (
     <>
       <Navbar />
+      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
