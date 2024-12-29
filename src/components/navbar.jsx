@@ -5,16 +5,38 @@ import { FiLogIn, FiShoppingCart } from "react-icons/fi";
 import { MdContactPage } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { api } from "../lib/api"; 
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [cartItems, setCartItems] = useState([]); // Track cart items
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     setIsLoggedIn(!!token);
+
+    // Fetch cart items on mount and set interval to refresh them
+    fetchCartItems(); // Fetch once on mount
+    const intervalId = setInterval(fetchCartItems, 2000); // Refresh cart every 2 seconds
+
+    return () => clearInterval(intervalId); // Clear interval on unmount
   }, []);
+
+  // Fetch cart items from the API
+  const fetchCartItems = async () => {
+    try {
+      const response = await api.get("/cart");
+      setCartItems(Array.isArray(response.data.cart.items) ? response.data.cart.items : []);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setCartItems([]); // Clear cart items if the cart is not found
+      } else {
+        console.error("There was an error fetching the cart items!", error);
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("auth_token");
@@ -51,6 +73,10 @@ function Navbar() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  // Dynamic class for cart icon animation and item count badge
+  const cartTabClass = cartItems.length > 0 ? "pulse-animation" : "";
+  const cartItemCount = cartItems.length > 0 ? cartItems.length : null;
 
   return (
     <nav className="py-4 text-white bg-black shadow-md">
@@ -89,11 +115,16 @@ function Navbar() {
               Contact Us
             </a>
           </li>
-          <li className="flex items-center space-x-2">
+          <li className={`flex items-center space-x-2 relative ${cartTabClass}`}>
             <FiShoppingCart size={24} />
             <a href="/cart" className="hover:underline">
               Cart
             </a>
+            {cartItemCount > 0 && (
+              <span className="absolute top-0 w-4 h-4 flex items-center justify-center text-sm font-bold text-white bg-red-600 rounded-full">
+                {cartItemCount}
+              </span>
+            )}
           </li>
 
           {isLoggedIn ? (
@@ -107,7 +138,6 @@ function Navbar() {
                 <span>Account</span>
               </button>
 
-           
               {isDropdownVisible && (
                 <ul
                   id="dropdown-menu"
