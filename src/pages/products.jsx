@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/navbar";
 import { api } from "../lib/api";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "react-hot-toast"; // Import react-hot-toast
 
-function Product() {
+const Product = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,16 +15,13 @@ function Product() {
     total: 0,
   });
 
-  const getProducts = async (page = 1) => {
+  // Optimized function to fetch products with pagination
+  const getProducts = useCallback(async (page = 1) => {
+    setLoading(true); // Show loading while fetching
     try {
       const response = await api.get(`/products?page=${page}`);
-      setProducts(
-        response.data.data.map((product) => ({
-          ...product,
-          discountedPrice: product.discountedPrice, // Adding discountedPrice
-          stock: product.stock, // Adding stock
-        }))
-      );
+      console.log("Fetched products:", response.data);
+      setProducts((prev) => (page === 1 ? response.data.data : [...prev, ...response.data.data]));
       setPagination({
         current_page: response.data.meta.current_page,
         last_page: response.data.meta.last_page,
@@ -38,32 +34,49 @@ function Product() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  // Optimized function to add items to the cart
   const addToCart = async (product) => {
     try {
       const response = await api.post("/cart", {
         items: [{ product_id: product.id, quantity: 1 }],
       });
-      console.log("Cart response:", response.data);
       setCart((prevCart) => [...prevCart, ...response.data.cart.items]);
-      console.log("Cart:", [...cart, ...response.data.cart.items]);
-      toast.success("Product added to cart successfully!");
+
+      // Show success toast with custom style
+      toast.success("Product added to cart successfully!", {
+        style: {
+          background: "#28a745",
+          color: "#fff",
+          fontWeight: "bold",
+        },
+      });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      setError("Failed to add product to cart. Please try again later.");
-      toast.error("Failed to add product to cart.");
+      toast.error("Failed to add product to cart.", {
+        style: {
+          background: "#dc3545",
+          color: "#fff",
+          fontWeight: "bold",
+        },
+      });
     }
   };
 
   useEffect(() => {
     getProducts();
-  }, []);
+  }, [getProducts]);
+
+  // Function to format amount in LKR (Sri Lankan Rupees in Millions)
+  const formatLKR = (amount) => {
+    return `LKR ${Number(amount).toFixed(1)} M`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <Navbar />
-      <ToastContainer />
+      <Toaster /> {/* Toaster component to display notifications */}
       <div
         className="container px-4 py-12 mx-auto"
         style={{
@@ -77,7 +90,11 @@ function Product() {
         </h1>
 
         {loading && (
-          <p className="text-center text-gray-300">Loading products...</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {[...Array(12)].map((_, index) => (
+              <div key={index} className="w-48 h-64 bg-gray-700 rounded-lg animate-pulse" />
+            ))}
+          </div>
         )}
 
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -88,53 +105,12 @@ function Product() {
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product) => (
-            <div
+            <ProductCard
               key={product.id}
-              className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105"
-            >
-              <img
-                src={product.image || "https://via.placeholder.com/150"}
-                alt={product.name}
-                className="object-cover w-full h-40"
-              />
-              <div className="p-4 text-gray-100">
-                <h3 className="text-xl font-semibold">{product.name}</h3>
-                <p className="mt-2 text-gray-400">{product.description}</p>
-                <div className="mt-2">
-                  {product.discountedPrice ? (
-                    <>
-                      <p className="text-gray-100 line-through">
-                        LKR {product.price}M
-                      </p>
-                      <p className="font-bold text-green-400">
-                        LKR {product.discountedPrice}M
-                      </p>
-                    </>
-                  ) : (
-                    <p className="font-bold text-gray-100">
-                      LKR {product.price}M
-                    </p>
-                  )}
-                </div>
-
-                <p
-                  className={`text-sm ${
-                    product.stock > 0 ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  {product.stock > 0
-                    ? `In Stock: ${product.stock}`
-                    : "Out of Stock"}
-                </p>
-                <button
-                  onClick={() => addToCart(product)}
-                  className="w-full px-4 py-2 mt-4 font-semibold text-center text-black transition-colors duration-300 bg-yellow-500 rounded hover:bg-yellow-600"
-                  disabled={product.stock <= 0}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            </div>
+              product={product}
+              addToCart={addToCart}
+              formatLKR={formatLKR}
+            />
           ))}
         </div>
 
@@ -226,6 +202,52 @@ function Product() {
       </div>
     </div>
   );
-}
+};
+
+// ProductCard Component for rendering each product
+const ProductCard = React.memo(({ product, addToCart, formatLKR }) => {
+  return (
+    <div className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105">
+      <img
+        src={product.image || "https://via.placeholder.com/150"}
+        alt={product.name}
+        className="object-cover w-full h-48"
+      />
+      <div className="p-4">
+        <h2 className="text-lg font-bold text-gray-100">{product.name}</h2>
+        <p className="text-sm text-gray-400">{product.description}</p>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center">
+            <span className="mr-2 text-xl text-yellow-400">
+              {formatLKR(product.discountedPrice)}
+            </span>
+            {product.price > product.discountedPrice && (
+              <span className="text-sm text-gray-500 line-through">
+                {formatLKR(product.price)}
+              </span>
+            )}
+          </div>
+          <div>
+            {product.stock > 0 ? (
+              <span className="px-2 py-1 text-xs font-semibold text-green-500 border border-green-500 rounded-lg">
+                In Stock
+              </span>
+            ) : (
+              <span className="px-2 py-1 text-xs font-semibold text-red-500 border border-red-500 rounded-lg">
+                Out of Stock
+              </span>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={() => addToCart(product)}
+          className="w-full py-2 mt-4 text-white bg-yellow-500 rounded-lg hover:bg-yellow-400"
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+});
 
 export default Product;
