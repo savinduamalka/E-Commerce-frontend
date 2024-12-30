@@ -242,8 +242,9 @@ const ProductCard = React.memo(({ product, addToCart, formatLKR }) => {
         <button
           onClick={() => addToCart(product)}
           className="w-full py-2 mt-4 text-white bg-yellow-500 rounded-lg hover:bg-yellow-400"
+          disabled={product.stock <= 0}
         >
-          Add to Cart
+          {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
         </button>
       </div>
     </div>
