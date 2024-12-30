@@ -13,12 +13,12 @@ import CategoryManagement from "./pages/adminpages/adminCategory";
 import { Toaster } from "react-hot-toast";
 import ProductManagement from "./pages/adminpages/adminProduct";
 import OrderManagement from "./pages/adminpages/adminOrder";
-
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
     <>
-    <Toaster />
+      <Toaster />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -27,13 +27,13 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Product />} />
-          <Route path="/admin" element={<AdminHome />} />
-          <Route path="/categories" element={<Category/>} />
-          <Route path="/admin/users" element={<UserManagement/>} />
-          <Route path="/editUserprofile" element={<EditUserProfile />} />
-          <Route path="/admin/categories" element={<CategoryManagement/>} />
-          <Route path="/admin/products" element={<ProductManagement/>} />
-          <Route path="/admin/orders" element={<OrderManagement/>} />
+          <Route path="/admin" element={<PrivateRoute element={<AdminHome />} />} />
+          <Route path="/categories" element={<Category />} />
+          <Route path="/admin/users" element={<PrivateRoute element={<UserManagement />} />} />
+          <Route path="/editUserprofile" element={<PrivateRoute element={<EditUserProfile />} />} />
+          <Route path="/admin/categories" element={<PrivateRoute element={<CategoryManagement />} />} />
+          <Route path="/admin/products" element={<PrivateRoute element={<ProductManagement />} />} />
+          <Route path="/admin/orders" element={<PrivateRoute element={<OrderManagement />} />} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>

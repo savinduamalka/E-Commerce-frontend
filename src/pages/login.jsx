@@ -25,6 +25,7 @@ function Login() {
       const response = await api.post("/login", formData);
       toast.success("Login successful!");
       localStorage.setItem("auth_token", response.data.access_token);
+      localStorage.setItem("user_role", response.data.user.role); 
       const userRole = response.data.user.role;
       if (userRole === "admin") {
         navigate("/admin");
