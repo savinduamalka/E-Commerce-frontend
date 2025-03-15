@@ -10,28 +10,42 @@ import { api } from "../lib/api";
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [cartItems, setCartItems] = useState([]); // Track cart items
+  const [cartItems, setCartItems] = useState([]);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     setIsLoggedIn(!!token);
 
-    // Fetch cart items on mount and set interval to refresh them
-    fetchCartItems(); // Fetch once on mount
-    const intervalId = setInterval(fetchCartItems, 2000); // Refresh cart every 2 seconds
+    fetchCartItems(); 
+    const intervalId = setInterval(fetchCartItems, 2000); 
 
-    return () => clearInterval(intervalId); // Clear interval on unmount
+    // Add scroll event listener
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      if (offset > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('scroll', handleScroll);
+    }; 
   }, []);
 
-  // Fetch cart items from the API
   const fetchCartItems = async () => {
     try {
       const response = await api.get("/cart");
       setCartItems(Array.isArray(response.data.cart.items) ? response.data.cart.items : []);
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        setCartItems([]); // Clear cart items if the cart is not found
+        setCartItems([]); 
       } else {
         console.error("There was an error fetching the cart items!", error);
       }
@@ -52,7 +66,6 @@ function Navbar() {
     setIsDropdownVisible(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       const dropdown = document.getElementById("dropdown-menu");
@@ -74,112 +87,151 @@ function Navbar() {
     };
   }, []);
 
-  // Dynamic class for cart icon animation and item count badge
-  const cartTabClass = cartItems.length > 0 ? "pulse-animation" : "";
-  const cartItemCount = cartItems.length > 0 ? cartItems.length : null;
+  // Calculate total items in cart
+  const cartItemCount = cartItems.length;
 
   return (
-    <nav className="py-4 text-white bg-black shadow-md">
-      <div className="container flex items-center justify-between mx-auto">
-        <div className="flex items-center text-2xl font-bold">
-          <img
-            src="../logo.png"
-            alt="Company Logo"
-            className="inline-block w-12 h-12 mr-2"
-          />
-          AutoMobile SL
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 mb-16 bg-black shadow-lg`}>
+        <div className="container px-4 mx-auto">
+          <div className="flex items-center justify-between">
+            {/* Logo Section */}
+            <div className="flex items-center">
+              <img
+                src="../logo.jpg"
+                alt="Company Logo"
+                className="w-auto h-10 mr-3 rounded"
+              />
+              <span className="text-xl font-bold text-white">AutoMobile SL</span>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="items-center hidden space-x-1 md:flex">
+              <NavLink href="/" icon={<AiFillHome className="text-gray-400 group-hover:text-white" />} text="Home" />
+              <NavLink href="/categories" icon={<BiCategory className="text-gray-400 group-hover:text-white" />} text="Categories" />
+              <NavLink href="/products" icon={<AiOutlineCar className="text-gray-400 group-hover:text-white" />} text="Vehicles" />
+              <NavLink href="/contact" icon={<MdContactPage className="text-gray-400 group-hover:text-white" />} text="Contact" />
+              
+              {/* Cart with badge */}
+              <div className="relative group">
+                <NavLink 
+                  href="/cart" 
+                  icon={<FiShoppingCart className={`text-gray-400 group-hover:text-white ${cartItemCount > 0 ? "animate-pulse" : ""}`} />} 
+                  text="Cart" 
+                />
+                {cartItemCount > 0 && (
+                  <span className="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full -top-1 -right-1">
+                    {cartItemCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Account/Login Section */}
+              {isLoggedIn ? (
+                <div className="relative ml-2">
+                  <button
+                    id="account-button"
+                    onClick={toggleDropdown}
+                    className="flex items-center px-3 py-2 space-x-2 transition-colors duration-200 rounded-full group hover:bg-gray-800"
+                  >
+                    <FaUserCircle className="text-gray-400 group-hover:text-white" />
+                    <span className="text-sm font-medium text-gray-300 group-hover:text-white">Account</span>
+                  </button>
+
+                  {isDropdownVisible && (
+                    <div
+                      id="dropdown-menu"
+                      className="absolute right-0 w-48 py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    >
+                      <DropdownItem onClick={() => { closeDropdown(); navigate("/editUserprofile"); }}>
+                        Edit Profile
+                      </DropdownItem>
+                      <DropdownItem onClick={() => { closeDropdown(); handleLogout(); }}>
+                        Logout
+                      </DropdownItem>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <NavLink 
+                  href="/login" 
+                  icon={<FiLogIn className="text-gray-400 group-hover:text-white" />} 
+                  text="Login" 
+                  highlight={true}
+                />
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="flex items-center md:hidden">
+              <button className="p-2 text-gray-300 rounded-md mobile-menu-button hover:text-white hover:bg-gray-800 focus:outline-none">
+                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <ul className="flex space-x-6 text-lg">
-          <li className="flex items-center space-x-2">
-            <AiFillHome size={24} />
-            <a href="/" className="hover:underline">
-              Home
-            </a>
-          </li>
-          <li className="flex items-center space-x-2">
-            <BiCategory size={24} />
-            <a href="/categories" className="hover:underline">
-              Categories
-            </a>
-          </li>
-          <li className="flex items-center space-x-2">
-            <AiOutlineCar size={24} />
-            <a href="/products" className="hover:underline">
-              Vehicles
-            </a>
-          </li>
-          <li className="flex items-center space-x-2">
-            <MdContactPage size={24} />
-            <a href="/contact" className="hover:underline">
-              Contact Us
-            </a>
-          </li>
-          <li className={`flex items-center space-x-2 relative ${cartTabClass}`}>
-            <FiShoppingCart size={24} />
-            <a href="/cart" className="hover:underline">
-              Cart
-            </a>
-            {cartItemCount > 0 && (
-              <span className="absolute top-0 flex items-center justify-center w-4 h-4 text-sm font-bold text-white bg-red-600 rounded-full">
-                {cartItemCount}
-              </span>
-            )}
-          </li>
-
-          {isLoggedIn ? (
-            <li className="relative">
-              <button
-                id="account-button"
-                onClick={toggleDropdown}
-                className="flex items-center space-x-2 hover:underline"
-              >
-                <FaUserCircle size={24} />
-                <span>Account</span>
-              </button>
-
-              {isDropdownVisible && (
-                <ul
-                  id="dropdown-menu"
-                  className="absolute right-0 z-50 w-48 p-2 mt-2 text-black bg-white border rounded shadow-lg"
+        {/* Mobile menu, hidden by default */}
+        <div className="hidden mobile-menu md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <MobileNavLink href="/" text="Home" />
+            <MobileNavLink href="/categories" text="Categories" />
+            <MobileNavLink href="/products" text="Vehicles" />
+            <MobileNavLink href="/contact" text="Contact Us" />
+            <MobileNavLink href="/cart" text="Cart" />
+            {isLoggedIn ? (
+              <>
+                <MobileNavLink href="/editUserprofile" text="Edit Profile" />
+                <button 
+                  onClick={handleLogout}
+                  className="block w-full px-3 py-2 text-left text-gray-300 hover:bg-gray-800 hover:text-white"
                 >
-                  <li>
-                    <button
-                      className="w-full px-4 py-2 text-left hover:bg-gray-200"
-                      onClick={() => {
-                        closeDropdown();
-                        navigate("/editUserprofile");
-                      }}
-                    >
-                      Edit Profile
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="w-full px-4 py-2 text-left hover:bg-gray-200"
-                      onClick={() => {
-                        closeDropdown();
-                        handleLogout();
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              )}
-            </li>
-          ) : (
-            <li className="flex items-center space-x-2">
-              <FiLogIn size={24} />
-              <a href="/login" className="hover:underline">
-                Login
-              </a>
-            </li>
-          )}
-        </ul>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <MobileNavLink href="/login" text="Login" />
+            )}
+          </div>
+        </div>
+      </nav>
+      <div className="mt-16">
+        {/* Page content starts here */}
       </div>
-    </nav>
+    </>
   );
 }
+
+// Helper Components
+const NavLink = ({ href, icon, text, highlight }) => (
+  <a 
+    href={href} 
+    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-full transition-colors duration-200 
+      ${highlight ? 'bg-white text-black hover:bg-gray-200' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+  >
+    <span className="mr-2">{icon}</span>
+    <span>{text}</span>
+  </a>
+);
+
+const MobileNavLink = ({ href, text }) => (
+  <a 
+    href={href} 
+    className="block px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white"
+  >
+    {text}
+  </a>
+);
+
+const DropdownItem = ({ onClick, children }) => (
+  <button
+    className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
 
 export default Navbar;
