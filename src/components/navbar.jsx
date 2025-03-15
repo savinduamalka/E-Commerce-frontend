@@ -12,6 +12,7 @@ function Navbar() {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [scrolled, setScrolled] = useState(false);
+  const [isMobileMenuVisible, setIsMobileMenuVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +65,10 @@ function Navbar() {
 
   const closeDropdown = () => {
     setIsDropdownVisible(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuVisible((prev) => !prev);
   };
 
   useEffect(() => {
@@ -164,7 +169,10 @@ function Navbar() {
 
             {/* Mobile menu button */}
             <div className="flex items-center md:hidden">
-              <button className="p-2 text-gray-300 rounded-md mobile-menu-button hover:text-white hover:bg-gray-800 focus:outline-none">
+              <button 
+                className="p-2 text-gray-300 rounded-md mobile-menu-button hover:text-white hover:bg-gray-800 focus:outline-none"
+                onClick={toggleMobileMenu}
+              >
                 <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -174,7 +182,7 @@ function Navbar() {
         </div>
 
         {/* Mobile menu, hidden by default */}
-        <div className="hidden mobile-menu md:hidden">
+        <div className={`mobile-menu md:hidden ${isMobileMenuVisible ? "block" : "hidden"}`}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <MobileNavLink href="/" text="Home" />
             <MobileNavLink href="/categories" text="Categories" />
