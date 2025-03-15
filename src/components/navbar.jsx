@@ -121,7 +121,7 @@ function Navbar() {
               Cart
             </a>
             {cartItemCount > 0 && (
-              <span className="absolute top-0 w-4 h-4 flex items-center justify-center text-sm font-bold text-white bg-red-600 rounded-full">
+              <span className="absolute top-0 flex items-center justify-center w-4 h-4 text-sm font-bold text-white bg-red-600 rounded-full">
                 {cartItemCount}
               </span>
             )}
@@ -172,7 +172,7 @@ function Navbar() {
             <li className="flex items-center space-x-2">
               <FiLogIn size={24} />
               <a href="/login" className="hover:underline">
-                Login/Signup
+                Login
               </a>
             </li>
           )}
