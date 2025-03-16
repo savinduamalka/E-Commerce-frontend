@@ -30,7 +30,7 @@ function App() {
           <Route path="/admin" element={<PrivateRoute element={<AdminHome />} />} />
           <Route path="/categories" element={<Category />} />
           <Route path="/admin/users" element={<PrivateRoute element={<UserManagement />} />} />
-          <Route path="/editUserprofile" element={<PrivateRoute element={<EditUserProfile />} />} />
+          <Route path="/editUserprofile" element={<EditUserProfile />} />
           <Route path="/admin/categories" element={<PrivateRoute element={<CategoryManagement />} />} />
           <Route path="/admin/products" element={<PrivateRoute element={<ProductManagement />} />} />
           <Route path="/admin/orders" element={<PrivateRoute element={<OrderManagement />} />} />

@@ -71,6 +71,11 @@ function Navbar() {
     setIsMobileMenuVisible((prev) => !prev);
   };
 
+  const handleEditProfile = () => {
+    closeDropdown();
+    navigate("/editUserprofile");
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       const dropdown = document.getElementById("dropdown-menu");
@@ -137,18 +142,18 @@ function Navbar() {
                   <button
                     id="account-button"
                     onClick={toggleDropdown}
-                    className="flex items-center px-3 py-2 space-x-2 transition-colors duration-200 rounded-full group hover:bg-gray-800"
+                    className="flex items-center px-3 py-2 space-x-2 font-bold transition-colors duration-200 bg-yellow-500 rounded-full group hover:bg-yellow-600"
                   >
-                    <FaUserCircle className="text-gray-400 group-hover:text-white" />
-                    <span className="text-sm font-medium text-gray-300 group-hover:text-white">Account</span>
+                    <FaUserCircle className="text-black group-hover:text-white" />
+                    <span className="text-sm font-bold text-black group-hover:text-white">Account</span>
                   </button>
 
                   {isDropdownVisible && (
                     <div
                       id="dropdown-menu"
-                      className="absolute right-0 w-48 py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                      className="absolute right-0 w-48 py-1 mt-2 bg-black rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                     >
-                      <DropdownItem onClick={() => { closeDropdown(); navigate("/editUserprofile"); }}>
+                      <DropdownItem onClick={handleEditProfile}>
                         Edit Profile
                       </DropdownItem>
                       <DropdownItem onClick={() => { closeDropdown(); handleLogout(); }}>
@@ -160,7 +165,7 @@ function Navbar() {
               ) : (
                 <NavLink 
                   href="/login" 
-                  icon={<FiLogIn className="text-gray-400 group-hover:text-white" />} 
+                  icon={<FiLogIn className="text-black group-hover:text-white" />} 
                   text="Login" 
                   highlight={true}
                 />
@@ -216,8 +221,8 @@ function Navbar() {
 const NavLink = ({ href, icon, text, highlight }) => (
   <a 
     href={href} 
-    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-full transition-colors duration-200 
-      ${highlight ? 'bg-white text-black hover:bg-gray-200' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+    className={`group flex items-center px-3 py-2 text-sm font-bold rounded-full transition-colors duration-200 
+      ${highlight ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
   >
     <span className="mr-2">{icon}</span>
     <span>{text}</span>
@@ -235,7 +240,7 @@ const MobileNavLink = ({ href, text }) => (
 
 const DropdownItem = ({ onClick, children }) => (
   <button
-    className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+    className="block w-full px-4 py-2 text-sm font-bold text-left text-white transition-colors duration-200 rounded hover:bg-yellow-500 hover:text-black"
     onClick={onClick}
   >
     {children}
