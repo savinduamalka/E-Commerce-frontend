@@ -1,8 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; 
 import Navbar from "../components/navbar";
+import { api } from "../lib/api";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 function HomePage() {
+  const [email, setEmail] = useState('');
+  const [alert, setAlert] = useState(null); // Use a single state for alert
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const manufacturers = [
     { name: "Toyota", logo: "../toyota-logo.png" },
@@ -37,6 +44,26 @@ function HomePage() {
     
     return () => clearInterval(interval);
   }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/subscribe', { email });
+      setAlert({ message: response.data.message, severity: "success" });
+      setEmail(''); 
+    } catch (error) {
+      setAlert({ message: 'Subscription failed', severity: "error" });
+    }
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+    setAlert(null); // Clear the alert
+  };
 
   const features = [
     { title: "Quality Assurance", icon: "✓" },
@@ -154,16 +181,25 @@ function HomePage() {
             <p className="mb-8 text-lg text-white">
               Subscribe to our newsletter for exclusive offers and updates on new arrivals.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <form onSubmit={handleSubmit} className="flex flex-col justify-center gap-4 sm:flex-row">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email address"
                 className="flex-grow max-w-md px-6 py-3 text-white bg-black border border-white rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 border-opacity-20"
               />
-              <button className="px-8 py-3 font-semibold text-black transition-all duration-300 bg-yellow-400 rounded-full hover:bg-yellow-500">
+              <button type="submit" className="px-8 py-3 font-semibold text-black transition-all duration-300 bg-yellow-400 rounded-full hover:bg-yellow-500">
                 Subscribe
               </button>
-            </div>
+            </form>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+              {alert && (
+                <Alert onClose={handleClose} severity={alert.severity} sx={{ width: '100%' }}>
+                  {alert.message}
+                </Alert>
+              )}
+            </Snackbar>
           </div>
         </div>
       </section>
