@@ -1,12 +1,13 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
   const authToken = localStorage.getItem("auth_token");
-  const userRole = localStorage.getItem("user_role"); 
+  const userRole = localStorage.getItem("user_role");
+  const location = useLocation();
 
   if (!authToken) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} />;
   }
 
   if (userRole !== "admin") {

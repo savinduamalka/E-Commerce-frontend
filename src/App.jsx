@@ -27,13 +27,13 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Product />} />
-          <Route path="/admin" element={<PrivateRoute element={<AdminHome />} />} />
+          <Route path="/admin" element={<PrivateRoute element={AdminHome} />} />
           <Route path="/categories" element={<Category />} />
-          <Route path="/admin/users" element={<PrivateRoute element={<UserManagement />} />} />
+          <Route path="/admin/users" element={<PrivateRoute element={UserManagement} />} />
           <Route path="/editUserprofile" element={<EditUserProfile />} />
-          <Route path="/admin/categories" element={<PrivateRoute element={<CategoryManagement />} />} />
-          <Route path="/admin/products" element={<PrivateRoute element={<ProductManagement />} />} />
-          <Route path="/admin/orders" element={<PrivateRoute element={<OrderManagement />} />} />
+          <Route path="/admin/categories" element={<PrivateRoute element={CategoryManagement} />} />
+          <Route path="/admin/products" element={<PrivateRoute element={ProductManagement} />} />
+          <Route path="/admin/orders" element={<PrivateRoute element={OrderManagement} />} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>

@@ -3,17 +3,19 @@ import { FaUser, FaThList, FaShoppingCart, FaBoxOpen } from "react-icons/fa";
 import { api } from "../../lib/api";
 import AdminSidebar from "../../components/adminsidebar";
 
-export default function AdminHome() {
+const AdminHome = () => {
   const [stats, setStats] = useState({
     total_users: 0,
     total_categories: 0,
     total_products: 0,
-    total_cart_items: 0,
+    total_orders: 0,
   });
 
   const fetchStats = async () => {
+    console.log("AdminHome: fetchStats called");
     try {
       const response = await api.get("/admin/stats");
+      console.log("AdminHome: fetchStats response", response.data);
       setStats(response.data);
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -21,6 +23,7 @@ export default function AdminHome() {
   };
 
   useEffect(() => {
+    console.log("AdminHome: useEffect called");
     fetchStats();
   }, []);
 
@@ -70,4 +73,6 @@ export default function AdminHome() {
       </main>
     </div>
   );
-}
+};
+
+export default AdminHome;
