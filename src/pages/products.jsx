@@ -38,6 +38,18 @@ const Product = () => {
 
   // Optimized function to add items to the cart
   const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to log in to continue.", {
+        style: {
+          background: "#dc3545",
+          color: "#fff",
+          fontWeight: "bold",
+        },
+      });
+      return;
+    }
+
     try {
       const response = await api.post("/cart", {
         items: [{ product_id: product.id, quantity: 1 }],
