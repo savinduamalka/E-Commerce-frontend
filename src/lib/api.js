@@ -8,19 +8,17 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token"); // Get saved token from localStorage
-  const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]'); // Get CSRF token meta tag
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`; // Add the Bearer token to headers
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("auth_token"); // Get JWT from storage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`; // Attach token
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  if (csrfTokenMeta) {
-    const csrfToken = csrfTokenMeta.getAttribute('content');
-    config.headers['X-CSRF-TOKEN'] = csrfToken; // Add the CSRF token to headers
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 export { api };
