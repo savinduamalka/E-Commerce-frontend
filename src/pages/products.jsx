@@ -38,7 +38,7 @@ const Product = () => {
 
   // Optimized function to add items to the cart
   const addToCart = async (product) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("auth_token");
     if (!token) {
       toast.error("You need to log in to continue.", {
         style: {
