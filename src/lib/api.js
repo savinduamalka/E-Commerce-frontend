@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-
+// Remove CSRF token handling
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token"); // Get saved token from localStorage
   if (token) {
