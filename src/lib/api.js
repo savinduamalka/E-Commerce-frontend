@@ -8,11 +8,14 @@ const api = axios.create({
   },
 });
 
-// Remove CSRF token handling
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token"); // Get saved token from localStorage
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Get CSRF token from meta tag
   if (token) {
     config.headers.Authorization = `Bearer ${token}`; // Add the Bearer token to headers
+  }
+  if (csrfToken) {
+    config.headers['X-CSRF-TOKEN'] = csrfToken; // Add the CSRF token to headers
   }
   return config;
 }, (error) => {
