@@ -10,11 +10,12 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token"); // Get saved token from localStorage
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Get CSRF token from meta tag
+  const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]'); // Get CSRF token meta tag
   if (token) {
     config.headers.Authorization = `Bearer ${token}`; // Add the Bearer token to headers
   }
-  if (csrfToken) {
+  if (csrfTokenMeta) {
+    const csrfToken = csrfTokenMeta.getAttribute('content');
     config.headers['X-CSRF-TOKEN'] = csrfToken; // Add the CSRF token to headers
   }
   return config;
