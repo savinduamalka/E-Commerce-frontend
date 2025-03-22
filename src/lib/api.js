@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_LARAVEL_API_URL || "http://localhost:8000/api",
+  baseURL: "https://e-commerce-backend-laravel-1.onrender.com/api",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
