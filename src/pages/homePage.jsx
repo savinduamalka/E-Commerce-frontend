@@ -120,11 +120,7 @@ function HomePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${import.meta.env.VITE_LARAVEL_API_URL}/subscribe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const response = await api.post("/subscribe", { email });
       setAlert({ message: response.data.message, severity: "success" });
       setEmail('');
     } catch (error) {
