@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from "react";
-import AdminSidebar from "../../components/adminsidebar";
-import { api } from "../../lib/api";
-import { toast } from "react-hot-toast";
-import { FaPlus } from "react-icons/fa"; // Import the icon
+import React, { useState, useEffect } from 'react';
+import AdminSidebar from '../../components/adminsidebar';
+import { api } from '../../lib/api';
+import { toast } from 'react-hot-toast';
+import { FaPlus } from 'react-icons/fa'; // Import the icon
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [editData, setEditData] = useState(null);
   const [isCreating, setIsCreating] = useState(false); // State for creating a new product
   const [newProduct, setNewProduct] = useState({
-    name: "",
-    description: "",
-    price: "",
-    discountedPrice: "",
-    categoryId: "",
-    stock: "",
-    image: "",
+    name: '',
+    description: '',
+    price: '',
+    discountedPrice: '',
+    categoryId: '',
+    stock: '',
+    image: '',
   });
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
     per_page: 12,
-    total: 0
+    total: 0,
   });
 
   useEffect(() => {
@@ -37,27 +37,27 @@ const ProductManagement = () => {
           current_page: response.data.meta.current_page,
           last_page: response.data.meta.last_page,
           per_page: response.data.meta.per_page,
-          total: response.data.meta.total
+          total: response.data.meta.total,
         });
-        toast.success("Products loaded successfully!");
+        toast.success('Products loaded successfully!');
       })
       .catch((error) => {
-        console.error("There was an error fetching the products!", error);
-        toast.error("Failed to load products!");
+        console.error('There was an error fetching the products!', error);
+        toast.error('Failed to load products!');
       });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm('Are you sure you want to delete this product?')) {
       api
         .delete(`/products/${id}`)
         .then(() => {
-          toast.success("Product deleted successfully!");
+          toast.success('Product deleted successfully!');
           fetchProducts();
         })
         .catch((error) => {
-          console.error("There was an error deleting the product!", error);
-          toast.error("Failed to delete product!");
+          console.error('There was an error deleting the product!', error);
+          toast.error('Failed to delete product!');
         });
     }
   };
@@ -69,16 +69,21 @@ const ProductManagement = () => {
   const handleUpdate = (e) => {
     e.preventDefault();
     if (editData) {
+      const payload = {
+        ...editData,
+        discountedPrice:
+          editData.discountedPrice === '' ? null : editData.discountedPrice,
+      };
       api
-        .put(`/products/${editData.id}`, editData)
+        .put(`/products/${editData.id}`, payload)
         .then(() => {
-          toast.success("Product updated successfully!");
+          toast.success('Product updated successfully!');
           fetchProducts();
           setEditData(null);
         })
         .catch((error) => {
-          console.error("There was an error updating the product!", error);
-          toast.error("Failed to update product!");
+          console.error('There was an error updating the product!', error);
+          toast.error('Failed to update product!');
         });
     }
   };
@@ -96,16 +101,16 @@ const ProductManagement = () => {
     } = newProduct;
 
     if (!name || !description || !price || !categoryId || !stock || !image) {
-      toast.error("All fields are required!");
+      toast.error('All fields are required!');
       return;
     }
 
     api
-      .post("/products", {
+      .post('/products', {
         name,
         description,
         price,
-        discountedPrice,
+        discountedPrice: discountedPrice === '' ? null : discountedPrice,
         categoryId,
         stock,
         image,
@@ -113,20 +118,20 @@ const ProductManagement = () => {
       .then((response) => {
         setProducts([...products, response.data.data]);
         setNewProduct({
-          name: "",
-          description: "",
-          price: "",
-          discountedPrice: "",
-          categoryId: "",
-          stock: "",
-          image: "",
+          name: '',
+          description: '',
+          price: '',
+          discountedPrice: '',
+          categoryId: '',
+          stock: '',
+          image: '',
         });
         setIsCreating(false);
-        toast.success("Product created successfully!");
+        toast.success('Product created successfully!');
       })
       .catch((error) => {
-        console.error("There was an error creating the product!", error);
-        toast.error("Failed to create product!");
+        console.error('There was an error creating the product!', error);
+        toast.error('Failed to create product!');
       });
   };
 
@@ -179,7 +184,7 @@ const ProductManagement = () => {
                     <td className="px-4 py-2 border">
                       {product.discountedPrice
                         ? `${product.discountedPrice}`
-                        : "N/A"}
+                        : 'N/A'}
                     </td>
                     <td className="px-4 py-2 border">{product.categoryId}</td>
                     <td className="px-4 py-2 border">{product.stock}</td>
@@ -217,7 +222,9 @@ const ProductManagement = () => {
               onClick={() => fetchProducts(pagination.current_page - 1)}
               disabled={pagination.current_page === 1}
               className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
-                pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                pagination.current_page === 1
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-gray-50'
               }`}
             >
               Previous
@@ -226,7 +233,9 @@ const ProductManagement = () => {
               onClick={() => fetchProducts(pagination.current_page + 1)}
               disabled={pagination.current_page === pagination.last_page}
               className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
-                pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                pagination.current_page === pagination.last_page
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-gray-50'
               }`}
             >
               Next
@@ -235,15 +244,19 @@ const ProductManagement = () => {
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Showing{" "}
+                Showing{' '}
                 <span className="font-medium">
                   {(pagination.current_page - 1) * pagination.per_page + 1}
-                </span>{" "}
-                to{" "}
+                </span>{' '}
+                to{' '}
                 <span className="font-medium">
-                  {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
-                </span>{" "}
-                of <span className="font-medium">{pagination.total}</span> results
+                  {Math.min(
+                    pagination.current_page * pagination.per_page,
+                    pagination.total
+                  )}
+                </span>{' '}
+                of <span className="font-medium">{pagination.total}</span>{' '}
+                results
               </p>
             </div>
             <div>
@@ -252,7 +265,9 @@ const ProductManagement = () => {
                   onClick={() => fetchProducts(pagination.current_page - 1)}
                   disabled={pagination.current_page === 1}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md ${
-                    pagination.current_page === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                    pagination.current_page === 1
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-50'
                   }`}
                 >
                   Previous
@@ -263,8 +278,8 @@ const ProductManagement = () => {
                     onClick={() => fetchProducts(index + 1)}
                     className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
                       pagination.current_page === index + 1
-                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                     }`}
                   >
                     {index + 1}
@@ -274,7 +289,9 @@ const ProductManagement = () => {
                   onClick={() => fetchProducts(pagination.current_page + 1)}
                   disabled={pagination.current_page === pagination.last_page}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md ${
-                    pagination.current_page === pagination.last_page ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+                    pagination.current_page === pagination.last_page
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-50'
                   }`}
                 >
                   Next
@@ -288,7 +305,7 @@ const ProductManagement = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="w-full max-w-lg p-6 bg-white rounded-lg">
               <h2 className="mb-4 text-xl font-bold">
-                {editData ? "Edit Product" : "Create Product"}
+                {editData ? 'Edit Product' : 'Create Product'}
               </h2>
               <form onSubmit={editData ? handleUpdate : handleCreate}>
                 <div className="mb-4">
@@ -313,10 +330,15 @@ const ProductManagement = () => {
                   </label>
                   <textarea
                     className="w-full px-3 py-2 border rounded"
-                    value={editData ? editData.description : newProduct.description}
+                    value={
+                      editData ? editData.description : newProduct.description
+                    }
                     onChange={(e) =>
                       editData
-                        ? setEditData({ ...editData, description: e.target.value })
+                        ? setEditData({
+                            ...editData,
+                            description: e.target.value,
+                          })
                         : setNewProduct({
                             ...newProduct,
                             description: e.target.value,
@@ -336,7 +358,10 @@ const ProductManagement = () => {
                     onChange={(e) =>
                       editData
                         ? setEditData({ ...editData, price: e.target.value })
-                        : setNewProduct({ ...newProduct, price: e.target.value })
+                        : setNewProduct({
+                            ...newProduct,
+                            price: e.target.value,
+                          })
                     }
                   />
                 </div>
@@ -348,7 +373,11 @@ const ProductManagement = () => {
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded"
-                    value={editData ? editData.discountedPrice : newProduct.discountedPrice}
+                    value={
+                      editData
+                        ? editData.discountedPrice
+                        : newProduct.discountedPrice
+                    }
                     onChange={(e) =>
                       editData
                         ? setEditData({
@@ -430,7 +459,7 @@ const ProductManagement = () => {
                     type="submit"
                     className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
                   >
-                    {editData ? "Save Changes" : "Create"}
+                    {editData ? 'Save Changes' : 'Create'}
                   </button>
 
                   <button

@@ -4,7 +4,7 @@ import { BiCategory } from 'react-icons/bi';
 import { FiLogIn, FiShoppingCart } from 'react-icons/fi';
 import { MdContactPage } from 'react-icons/md';
 import { FaUserCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 
 function Navbar() {
@@ -282,8 +282,8 @@ function Navbar() {
 
 // Helper Components
 const NavLink = ({ href, icon, text, highlight }) => (
-  <a
-    href={href}
+  <Link
+    to={href}
     className={`group flex items-center px-3 py-2 text-sm font-bold rounded-full transition-colors duration-200 
       ${
         highlight
@@ -293,16 +293,16 @@ const NavLink = ({ href, icon, text, highlight }) => (
   >
     <span className="mr-2">{icon}</span>
     <span>{text}</span>
-  </a>
+  </Link>
 );
 
 const MobileNavLink = ({ href, text }) => (
-  <a
-    href={href}
+  <Link
+    to={href}
     className="block px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white"
   >
     {text}
-  </a>
+  </Link>
 );
 
 const DropdownItem = ({ onClick, children }) => (

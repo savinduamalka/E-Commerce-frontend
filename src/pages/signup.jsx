@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../lib/api';
 import Navbar from '../components/navbar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 function SignUp() {
@@ -131,9 +131,9 @@ function SignUp() {
           {error && <p className="mt-4 text-center text-red-500">{error}</p>}
           <p className="mt-4 text-center text-gray-400">
             Already have an account?{' '}
-            <a href="/login" className="text-yellow-400 hover:underline">
+            <Link to="/login" className="text-yellow-400 hover:underline">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>

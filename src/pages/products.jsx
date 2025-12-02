@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import { api } from '../lib/api';
-import { toast } from 'react-hot-toast'; // Import react-hot-toast
+import { toast } from 'react-hot-toast';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -10,27 +11,32 @@ const Product = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
   const [pagination, setPagination] = useState({
-    current_page: 1,
+    current_page: currentPage,
     last_page: 1,
     per_page: 12,
     total: 0,
   });
 
-  // Optimized function to fetch products with pagination
-  const getProducts = useCallback(async (page = 1) => {
-    setLoading(true); // Show loading while fetching
+  const getProducts = useCallback(async (page) => {
+    setLoading(true);
     try {
       const response = await api.get(`/products?page=${page}`);
       console.log('Fetched products:', response.data);
-      setProducts((prev) =>
-        page === 1 ? response.data.data : [...prev, ...response.data.data]
-      );
+
+      const data = response.data.data || [];
+      const meta = response.data.meta || {};
+
+      setProducts(data);
       setPagination({
-        current_page: response.data.meta.current_page,
-        last_page: response.data.meta.last_page,
-        per_page: response.data.meta.per_page,
-        total: response.data.meta.total,
+        current_page: meta.current_page || page,
+        last_page: meta.last_page || 1,
+        per_page: meta.per_page || 12,
+        total: meta.total || 0,
       });
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -40,7 +46,6 @@ const Product = () => {
     }
   }, []);
 
-  // Optimized function to add items to the cart
   const addToCart = async (product) => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
@@ -58,9 +63,12 @@ const Product = () => {
       const response = await api.post('/cart', {
         items: [{ product_id: product.id, quantity: 1 }],
       });
-      setCart((prevCart) => [...prevCart, ...response.data.cart.items]);
 
-      // Show success toast with custom style
+      setCart((prevCart) => {
+        const newItems = response.data.cart?.items || [];
+        return [...prevCart, ...newItems];
+      });
+
       toast.success('Product added to cart successfully!', {
         style: {
           background: '#28a745',
@@ -81,12 +89,18 @@ const Product = () => {
   };
 
   useEffect(() => {
-    getProducts();
-  }, [getProducts]);
+    getProducts(currentPage);
+  }, [currentPage, getProducts]);
 
-  // Function to format amount in LKR (Sri Lankan Rupees in Millions)
   const formatLKR = (amount) => {
     return `LKR ${Number(amount).toFixed(1)} M`;
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.last_page) {
+      setSearchParams({ page: newPage });
+      window.scrollTo(0, 0);
+    }
   };
 
   return (
@@ -145,91 +159,96 @@ const Product = () => {
           ))}
         </div>
 
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-between px-4 py-3 mt-8 bg-gray-900 border border-gray-700 rounded-lg">
-          <div className="flex justify-between flex-1 sm:hidden">
-            <button
-              onClick={() => getProducts(pagination.current_page - 1)}
-              disabled={pagination.current_page === 1}
-              className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
-                pagination.current_page === 1
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-gray-700'
-              }`}
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => getProducts(pagination.current_page + 1)}
-              disabled={pagination.current_page === pagination.last_page}
-              className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
-                pagination.current_page === pagination.last_page
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-gray-700'
-              }`}
-            >
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-300">
-                Showing{' '}
-                <span className="font-medium">
-                  {(pagination.current_page - 1) * pagination.per_page + 1}
-                </span>{' '}
-                to{' '}
-                <span className="font-medium">
-                  {Math.min(
-                    pagination.current_page * pagination.per_page,
-                    pagination.total
-                  )}
-                </span>{' '}
-                of <span className="font-medium">{pagination.total}</span>{' '}
-                results
-              </p>
+        {!loading && products.length > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 mt-8 bg-gray-900 border border-gray-700 rounded-lg">
+            <div className="flex justify-between flex-1 sm:hidden">
+              <button
+                onClick={() => handlePageChange(pagination.current_page - 1)}
+                disabled={pagination.current_page === 1}
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
+                  pagination.current_page === 1
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-gray-700'
+                }`}
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(pagination.current_page + 1)}
+                disabled={pagination.current_page === pagination.last_page}
+                className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-200 bg-gray-800 border border-gray-600 rounded-md ${
+                  pagination.current_page === pagination.last_page
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-gray-700'
+                }`}
+              >
+                Next
+              </button>
             </div>
-            <div>
-              <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
-                <button
-                  onClick={() => getProducts(pagination.current_page - 1)}
-                  disabled={pagination.current_page === 1}
-                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-l-md ${
-                    pagination.current_page === 1
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-gray-700'
-                  }`}
-                >
-                  Previous
-                </button>
-                {[...Array(pagination.last_page)].map((_, index) => (
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-300">
+                  Showing{' '}
+                  <span className="font-medium">
+                    {(pagination.current_page - 1) * pagination.per_page + 1}
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-medium">
+                    {Math.min(
+                      pagination.current_page * pagination.per_page,
+                      pagination.total
+                    )}
+                  </span>{' '}
+                  of <span className="font-medium">{pagination.total}</span>{' '}
+                  results
+                </p>
+              </div>
+              <div>
+                <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
                   <button
-                    key={index + 1}
-                    onClick={() => getProducts(index + 1)}
-                    className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
-                      pagination.current_page === index + 1
-                        ? 'z-10 bg-yellow-500 border-yellow-500 text-black'
-                        : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'
+                    onClick={() =>
+                      handlePageChange(pagination.current_page - 1)
+                    }
+                    disabled={pagination.current_page === 1}
+                    className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-l-md ${
+                      pagination.current_page === 1
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-gray-700'
                     }`}
                   >
-                    {index + 1}
+                    Previous
                   </button>
-                ))}
-                <button
-                  onClick={() => getProducts(pagination.current_page + 1)}
-                  disabled={pagination.current_page === pagination.last_page}
-                  className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-r-md ${
-                    pagination.current_page === pagination.last_page
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-gray-700'
-                  }`}
-                >
-                  Next
-                </button>
-              </nav>
+                  {[...Array(pagination.last_page)].map((_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                        pagination.current_page === index + 1
+                          ? 'z-10 bg-yellow-500 border-yellow-500 text-black'
+                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() =>
+                      handlePageChange(pagination.current_page + 1)
+                    }
+                    disabled={pagination.current_page === pagination.last_page}
+                    className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-600 rounded-r-md ${
+                      pagination.current_page === pagination.last_page
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    Next
+                  </button>
+                </nav>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -239,21 +258,32 @@ const Product = () => {
 const ProductCard = React.memo(({ product, addToCart, formatLKR }) => {
   return (
     <div className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105">
-      <img
-        src={product.image || 'https://via.placeholder.com/150'}
-        alt={product.name}
-        className="object-cover w-full h-48"
-      />
+      <Link to={`/products/${product.id}`}>
+        <img
+          src={product.image || 'https://via.placeholder.com/150'}
+          alt={product.name}
+          className="object-cover w-full h-48"
+        />
+      </Link>
       <div className="p-4">
-        <h2 className="text-lg font-bold text-gray-100">{product.name}</h2>
-        <p className="text-sm text-gray-400">{product.description}</p>
+        <Link to={`/products/${product.id}`}>
+          <h2 className="text-lg font-bold text-gray-100 hover:text-yellow-500">
+            {product.name}
+          </h2>
+        </Link>
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center">
-            <span className="mr-2 text-xl text-yellow-400">
-              {formatLKR(product.discountedPrice)}
-            </span>
-            {product.price > product.discountedPrice && (
-              <span className="text-sm text-gray-500 line-through">
+            {product.discountedPrice && product.discountedPrice > 0 ? (
+              <>
+                <span className="mr-2 text-xl text-yellow-400">
+                  {formatLKR(product.discountedPrice)}
+                </span>
+                <span className="text-sm text-gray-500 line-through">
+                  {formatLKR(product.price)}
+                </span>
+              </>
+            ) : (
+              <span className="text-xl text-yellow-400">
                 {formatLKR(product.price)}
               </span>
             )}

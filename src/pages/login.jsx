@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import { api } from '../lib/api';
 import { toast } from 'react-hot-toast';
@@ -103,9 +103,9 @@ function Login() {
           {error && <p className="mt-4 text-center text-red-500">{error}</p>}
           <p className="mt-4 text-center text-gray-400">
             Don't have an account?{' '}
-            <a href="/signup" className="text-yellow-400 hover:underline">
+            <Link to="/signup" className="text-yellow-400 hover:underline">
               Sign Up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
