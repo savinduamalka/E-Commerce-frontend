@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { AiFillHome, AiOutlineCar } from "react-icons/ai";
-import { BiCategory } from "react-icons/bi";
-import { FiLogIn, FiShoppingCart } from "react-icons/fi";
-import { MdContactPage } from "react-icons/md";
-import { FaUserCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { api } from "../lib/api"; 
+import React, { useState, useEffect } from 'react';
+import { AiFillHome, AiOutlineCar } from 'react-icons/ai';
+import { BiCategory } from 'react-icons/bi';
+import { FiLogIn, FiShoppingCart } from 'react-icons/fi';
+import { MdContactPage } from 'react-icons/md';
+import { FaUserCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -16,11 +16,11 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem('auth_token');
     setIsLoggedIn(!!token);
 
-    fetchCartItems(); 
-    const intervalId = setInterval(fetchCartItems, 2000); 
+    fetchCartItems();
+    const intervalId = setInterval(fetchCartItems, 2000);
 
     // Add scroll event listener
     const handleScroll = () => {
@@ -37,26 +37,33 @@ function Navbar() {
     return () => {
       clearInterval(intervalId);
       window.removeEventListener('scroll', handleScroll);
-    }; 
+    };
   }, []);
 
   const fetchCartItems = async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
     try {
-      const response = await api.get("/cart");
-      setCartItems(Array.isArray(response.data.cart.items) ? response.data.cart.items : []);
+      const response = await api.get('/cart');
+      setCartItems(
+        Array.isArray(response.data.cart.items) ? response.data.cart.items : []
+      );
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        setCartItems([]); 
+        setCartItems([]);
+      } else if (error.response && error.response.status === 401) {
+        // Silently handle unauthorized errors
       } else {
-        console.error("There was an error fetching the cart items!", error);
+        console.error('There was an error fetching the cart items!', error);
       }
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem('auth_token');
     setIsLoggedIn(false);
-    navigate("/");
+    navigate('/');
   };
 
   const toggleDropdown = () => {
@@ -73,13 +80,13 @@ function Navbar() {
 
   const handleEditProfile = () => {
     closeDropdown();
-    navigate("/editUserprofile");
+    navigate('/editUserprofile');
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const dropdown = document.getElementById("dropdown-menu");
-      const accountButton = document.getElementById("account-button");
+      const dropdown = document.getElementById('dropdown-menu');
+      const accountButton = document.getElementById('account-button');
 
       if (
         dropdown &&
@@ -91,9 +98,9 @@ function Navbar() {
       }
     };
 
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, []);
 
@@ -102,7 +109,9 @@ function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 mb-16 bg-black shadow-lg`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 mb-16 bg-black shadow-lg`}
+      >
         <div className="container px-4 mx-auto">
           <div className="flex items-center justify-between">
             {/* Logo Section */}
@@ -112,22 +121,54 @@ function Navbar() {
                 alt="Company Logo"
                 className="w-auto h-10 mr-3 rounded"
               />
-              <span className="text-xl font-bold text-white">AutoMobile SL</span>
+              <span className="text-xl font-bold text-white">
+                AutoMobile SL
+              </span>
             </div>
 
             {/* Navigation Links */}
             <div className="items-center hidden space-x-1 md:flex">
-              <NavLink href="/" icon={<AiFillHome className="text-gray-400 group-hover:text-white" />} text="Home" />
-              <NavLink href="/categories" icon={<BiCategory className="text-gray-400 group-hover:text-white" />} text="Categories" />
-              <NavLink href="/products" icon={<AiOutlineCar className="text-gray-400 group-hover:text-white" />} text="Vehicles" />
-              <NavLink href="/contact" icon={<MdContactPage className="text-gray-400 group-hover:text-white" />} text="Contact" />
-              
+              <NavLink
+                href="/"
+                icon={
+                  <AiFillHome className="text-gray-400 group-hover:text-white" />
+                }
+                text="Home"
+              />
+              <NavLink
+                href="/categories"
+                icon={
+                  <BiCategory className="text-gray-400 group-hover:text-white" />
+                }
+                text="Categories"
+              />
+              <NavLink
+                href="/products"
+                icon={
+                  <AiOutlineCar className="text-gray-400 group-hover:text-white" />
+                }
+                text="Vehicles"
+              />
+              <NavLink
+                href="/contact"
+                icon={
+                  <MdContactPage className="text-gray-400 group-hover:text-white" />
+                }
+                text="Contact"
+              />
+
               {/* Cart with badge */}
               <div className="relative group">
-                <NavLink 
-                  href="/cart" 
-                  icon={<FiShoppingCart className={`text-gray-400 group-hover:text-white ${cartItemCount > 0 ? "animate-pulse" : ""}`} />} 
-                  text="Cart" 
+                <NavLink
+                  href="/cart"
+                  icon={
+                    <FiShoppingCart
+                      className={`text-gray-400 group-hover:text-white ${
+                        cartItemCount > 0 ? 'animate-pulse' : ''
+                      }`}
+                    />
+                  }
+                  text="Cart"
                 />
                 {cartItemCount > 0 && (
                   <span className="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full -top-1 -right-1">
@@ -145,7 +186,9 @@ function Navbar() {
                     className="flex items-center px-3 py-2 space-x-2 font-bold transition-colors duration-200 bg-yellow-500 rounded-full group hover:bg-yellow-600"
                   >
                     <FaUserCircle className="text-black group-hover:text-white" />
-                    <span className="text-sm font-bold text-black group-hover:text-white">Account</span>
+                    <span className="text-sm font-bold text-black group-hover:text-white">
+                      Account
+                    </span>
                   </button>
 
                   {isDropdownVisible && (
@@ -156,17 +199,24 @@ function Navbar() {
                       <DropdownItem onClick={handleEditProfile}>
                         Edit Profile
                       </DropdownItem>
-                      <DropdownItem onClick={() => { closeDropdown(); handleLogout(); }}>
+                      <DropdownItem
+                        onClick={() => {
+                          closeDropdown();
+                          handleLogout();
+                        }}
+                      >
                         Logout
                       </DropdownItem>
                     </div>
                   )}
                 </div>
               ) : (
-                <NavLink 
-                  href="/login" 
-                  icon={<FiLogIn className="text-black group-hover:text-white" />} 
-                  text="Login" 
+                <NavLink
+                  href="/login"
+                  icon={
+                    <FiLogIn className="text-black group-hover:text-white" />
+                  }
+                  text="Login"
                   highlight={true}
                 />
               )}
@@ -174,12 +224,23 @@ function Navbar() {
 
             {/* Mobile menu button */}
             <div className="flex items-center md:hidden">
-              <button 
+              <button
                 className="p-2 text-gray-300 rounded-md mobile-menu-button hover:text-white hover:bg-gray-800 focus:outline-none"
                 onClick={toggleMobileMenu}
               >
-                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -187,7 +248,11 @@ function Navbar() {
         </div>
 
         {/* Mobile menu, hidden by default */}
-        <div className={`mobile-menu md:hidden ${isMobileMenuVisible ? "block" : "hidden"}`}>
+        <div
+          className={`mobile-menu md:hidden ${
+            isMobileMenuVisible ? 'block' : 'hidden'
+          }`}
+        >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <MobileNavLink href="/" text="Home" />
             <MobileNavLink href="/categories" text="Categories" />
@@ -197,7 +262,7 @@ function Navbar() {
             {isLoggedIn ? (
               <>
                 <MobileNavLink href="/editUserprofile" text="Edit Profile" />
-                <button 
+                <button
                   onClick={handleLogout}
                   className="block w-full px-3 py-2 text-left text-gray-300 hover:bg-gray-800 hover:text-white"
                 >
@@ -210,19 +275,21 @@ function Navbar() {
           </div>
         </div>
       </nav>
-      <div className="mt-16">
-        {/* Page content starts here */}
-      </div>
+      <div className="mt-16">{/* Page content starts here */}</div>
     </>
   );
 }
 
 // Helper Components
 const NavLink = ({ href, icon, text, highlight }) => (
-  <a 
-    href={href} 
+  <a
+    href={href}
     className={`group flex items-center px-3 py-2 text-sm font-bold rounded-full transition-colors duration-200 
-      ${highlight ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+      ${
+        highlight
+          ? 'bg-yellow-500 text-black hover:bg-yellow-600'
+          : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+      }`}
   >
     <span className="mr-2">{icon}</span>
     <span>{text}</span>
@@ -230,8 +297,8 @@ const NavLink = ({ href, icon, text, highlight }) => (
 );
 
 const MobileNavLink = ({ href, text }) => (
-  <a 
-    href={href} 
+  <a
+    href={href}
     className="block px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white"
   >
     {text}
