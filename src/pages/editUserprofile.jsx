@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { api } from "../lib/api";
-import Navbar from "../components/navbar";
-import { Toaster, toast } from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import { api } from '../lib/api';
+import Navbar from '../components/navbar';
+import { toast } from 'react-hot-toast';
 
 function EditUserProfile() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    city: "",
+    name: '',
+    email: '',
+    city: '',
   });
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await api.get("/user/me");
+        const response = await api.get('/user/me');
         setFormData(response.data.user);
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error('Error fetching user data:', error);
       }
     };
 
@@ -31,18 +31,17 @@ function EditUserProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put("/user/me", { name: formData.name, city: formData.city });
-      toast.success("Profile updated successfully!");
+      await api.put('/user/me', { name: formData.name, city: formData.city });
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile. Please try again later.");
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile. Please try again later.');
     }
   };
 
   return (
     <>
       <Navbar />
-      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
@@ -62,7 +61,7 @@ function EditUserProfile() {
                 type="text"
                 id="name"
                 className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                value={formData.name || ""}
+                value={formData.name || ''}
                 onChange={handleChange}
                 required
               />
@@ -78,7 +77,7 @@ function EditUserProfile() {
                 type="email"
                 id="email"
                 className="w-full px-4 py-2 text-gray-400 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                value={formData.email || ""}
+                value={formData.email || ''}
                 readOnly
               />
             </div>
@@ -90,7 +89,7 @@ function EditUserProfile() {
                 type="text"
                 id="city"
                 className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                value={formData.city || ""}
+                value={formData.city || ''}
                 onChange={handleChange}
                 required
               />

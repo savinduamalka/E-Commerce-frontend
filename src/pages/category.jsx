@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Navbar from "../components/navbar";
-import { api } from "../lib/api";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/navbar';
+import { api } from '../lib/api';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 function Category() {
   const [categories, setCategories] = useState([]);
@@ -9,11 +11,11 @@ function Category() {
 
   const getCategory = async () => {
     try {
-      const response = await api.get("/categories");
+      const response = await api.get('/categories');
       setCategories(response.data.data);
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      setError("Failed to load categories. Please try again later.");
+      console.error('Error fetching categories:', error);
+      setError('Failed to load categories. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -30,8 +32,8 @@ function Category() {
         className="container px-4 py-12 mx-auto"
         style={{
           backgroundImage: 'url("/home-wallpaper.jpg")',
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
         <h1 className="mb-8 text-4xl font-bold text-center text-gray-100">
@@ -39,7 +41,22 @@ function Category() {
         </h1>
 
         {loading && (
-          <p className="text-center text-gray-300">Loading categories...</p>
+          <SkeletonTheme baseColor="#202020" highlightColor="#444">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {[...Array(8)].map((_, index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden bg-gray-900 rounded-lg shadow-lg"
+                >
+                  <Skeleton height={160} />
+                  <div className="p-4">
+                    <Skeleton height={24} width="80%" />
+                    <Skeleton height={16} width="60%" className="mt-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SkeletonTheme>
         )}
 
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -55,7 +72,7 @@ function Category() {
               className="overflow-hidden transition-transform duration-300 bg-gray-900 rounded-lg shadow-lg hover:scale-105"
             >
               <img
-                src={category.image || "https://via.placeholder.com/150"}
+                src={category.image || 'https://via.placeholder.com/150'}
                 alt={category.name}
                 className="object-cover w-full h-40"
               />

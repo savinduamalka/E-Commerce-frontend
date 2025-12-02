@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { api } from "../lib/api";
-import Navbar from "../components/navbar";
-import { useNavigate } from "react-router-dom";
-import { Toaster, toast } from "react-hot-toast";
+import React, { useState } from 'react';
+import { api } from '../lib/api';
+import Navbar from '../components/navbar';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 function SignUp() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    city: "",
+    name: '',
+    email: '',
+    password: '',
+    city: '',
   });
 
   const [error, setError] = useState(null);
@@ -28,21 +28,20 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/register", formData);
-      toast.success("User created successfully!");
+      const response = await api.post('/register', formData);
+      toast.success('User created successfully!');
       console.log(response.data);
-      navigate("/login");
+      navigate('/login');
     } catch (err) {
-      setError("An error occurred while creating the account.");
+      setError('An error occurred while creating the account.');
       console.error(err);
-      toast.error("An error occurred while creating the account.");
+      toast.error('An error occurred while creating the account.');
     }
   };
 
   return (
     <>
       <Navbar />
-      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
@@ -93,7 +92,7 @@ function SignUp() {
                 Password
               </label>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 placeholder="Enter your password"
@@ -105,7 +104,7 @@ function SignUp() {
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword ? '🙈' : '👁️'}
               </span>
             </div>
             <div className="mb-6">
@@ -131,7 +130,7 @@ function SignUp() {
           </form>
           {error && <p className="mt-4 text-center text-red-500">{error}</p>}
           <p className="mt-4 text-center text-gray-400">
-            Already have an account?{" "}
+            Already have an account?{' '}
             <a href="/login" className="text-yellow-400 hover:underline">
               Login
             </a>

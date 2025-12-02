@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/navbar";
-import { api } from "../lib/api";
-import { Toaster, toast } from "react-hot-toast";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/navbar';
+import { api } from '../lib/api';
+import { toast } from 'react-hot-toast';
 
 function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -22,27 +22,26 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/login", formData);
-      toast.success("Login successful!");
-      localStorage.setItem("auth_token", response.data.access_token);
-      localStorage.setItem("user_role", response.data.user.role); 
+      const response = await api.post('/login', formData);
+      toast.success('Login successful!');
+      localStorage.setItem('auth_token', response.data.access_token);
+      localStorage.setItem('user_role', response.data.user.role);
       const userRole = response.data.user.role;
-      if (userRole === "admin") {
-        navigate("/admin");
+      if (userRole === 'admin') {
+        navigate('/admin');
       } else {
-        navigate("/");
+        navigate('/');
       }
     } catch (err) {
-      setError("Invalid email or password.");
+      setError('Invalid email or password.');
       console.error(err);
-      toast.error("Invalid email or password.");
+      toast.error('Invalid email or password.');
     }
   };
 
   return (
     <>
       <Navbar />
-      <Toaster />
       <div
         className="h-[calc(100vh-4rem)] flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
@@ -79,7 +78,7 @@ function Login() {
                 Password
               </label>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 placeholder="Enter your password"
@@ -91,7 +90,7 @@ function Login() {
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword ? '🙈' : '👁️'}
               </span>
             </div>
             <button
@@ -103,7 +102,7 @@ function Login() {
           </form>
           {error && <p className="mt-4 text-center text-red-500">{error}</p>}
           <p className="mt-4 text-center text-gray-400">
-            Don't have an account?{" "}
+            Don't have an account?{' '}
             <a href="/signup" className="text-yellow-400 hover:underline">
               Sign Up
             </a>
