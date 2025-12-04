@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AdminSidebar from '../../components/adminsidebar';
 import { api } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import { FaPlus } from 'react-icons/fa'; // Import the icon
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 
 const ProductManagement = () => {
-  const [products, setProducts] = useState([]);
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [editData, setEditData] = useState(null);
   const [isCreating, setIsCreating] = useState(false); // State for creating a new product
   const [newProduct, setNewProduct] = useState({
@@ -17,48 +24,74 @@ const ProductManagement = () => {
     stock: '',
     image: '',
   });
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    last_page: 1,
-    per_page: 12,
-    total: 0,
+
+  const { data } = useQuery({
+    queryKey: ['admin-products', page],
+    queryFn: () => api.get(`/products?page=${page}`).then((res) => res.data),
+    placeholderData: keepPreviousData,
+    staleTime: 300000, // 5 minutes
   });
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const products = data?.data || [];
+  const meta = data?.meta || {};
 
-  const fetchProducts = (page = 1) => {
-    api
-      .get(`/products?page=${page}`)
-      .then((response) => {
-        setProducts(response.data.data);
-        setPagination({
-          current_page: response.data.meta.current_page,
-          last_page: response.data.meta.last_page,
-          per_page: response.data.meta.per_page,
-          total: response.data.meta.total,
-        });
-        toast.success('Products loaded successfully!');
-      })
-      .catch((error) => {
-        console.error('There was an error fetching the products!', error);
-        toast.error('Failed to load products!');
-      });
+  const pagination = {
+    current_page: meta.current_page || page,
+    last_page: meta.last_page || 1,
+    per_page: meta.per_page || 12,
+    total: meta.total || 0,
   };
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/products/${id}`),
+    onSuccess: () => {
+      toast.success('Product deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (error) => {
+      console.error('There was an error deleting the product!', error);
+      toast.error('Failed to delete product!');
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (newProductData) => api.post('/products', newProductData),
+    onSuccess: () => {
+      toast.success('Product created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      setNewProduct({
+        name: '',
+        description: '',
+        price: '',
+        discountedPrice: '',
+        categoryId: '',
+        stock: '',
+        image: '',
+      });
+      setIsCreating(false);
+    },
+    onError: (error) => {
+      console.error('There was an error creating the product!', error);
+      toast.error('Failed to create product!');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }) => api.put(`/products/${id}`, payload),
+    onSuccess: () => {
+      toast.success('Product updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      setEditData(null);
+    },
+    onError: (error) => {
+      console.error('There was an error updating the product!', error);
+      toast.error('Failed to update product!');
+    },
+  });
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      api
-        .delete(`/products/${id}`)
-        .then(() => {
-          toast.success('Product deleted successfully!');
-          fetchProducts();
-        })
-        .catch((error) => {
-          console.error('There was an error deleting the product!', error);
-          toast.error('Failed to delete product!');
-        });
+      deleteMutation.mutate(id);
     }
   };
 
@@ -74,17 +107,7 @@ const ProductManagement = () => {
         discountedPrice:
           editData.discountedPrice === '' ? null : editData.discountedPrice,
       };
-      api
-        .put(`/products/${editData.id}`, payload)
-        .then(() => {
-          toast.success('Product updated successfully!');
-          fetchProducts();
-          setEditData(null);
-        })
-        .catch((error) => {
-          console.error('There was an error updating the product!', error);
-          toast.error('Failed to update product!');
-        });
+      updateMutation.mutate({ id: editData.id, payload });
     }
   };
 
@@ -105,34 +128,21 @@ const ProductManagement = () => {
       return;
     }
 
-    api
-      .post('/products', {
-        name,
-        description,
-        price,
-        discountedPrice: discountedPrice === '' ? null : discountedPrice,
-        categoryId,
-        stock,
-        image,
-      })
-      .then((response) => {
-        setProducts([...products, response.data.data]);
-        setNewProduct({
-          name: '',
-          description: '',
-          price: '',
-          discountedPrice: '',
-          categoryId: '',
-          stock: '',
-          image: '',
-        });
-        setIsCreating(false);
-        toast.success('Product created successfully!');
-      })
-      .catch((error) => {
-        console.error('There was an error creating the product!', error);
-        toast.error('Failed to create product!');
-      });
+    createMutation.mutate({
+      name,
+      description,
+      price,
+      discountedPrice: discountedPrice === '' ? null : discountedPrice,
+      categoryId,
+      stock,
+      image,
+    });
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.last_page) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -219,7 +229,7 @@ const ProductManagement = () => {
         <div className="flex items-center justify-between px-4 py-3 mt-4 bg-white border-t border-gray-200 sm:px-6">
           <div className="flex justify-between flex-1 sm:hidden">
             <button
-              onClick={() => fetchProducts(pagination.current_page - 1)}
+              onClick={() => handlePageChange(pagination.current_page - 1)}
               disabled={pagination.current_page === 1}
               className={`relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
                 pagination.current_page === 1
@@ -230,7 +240,7 @@ const ProductManagement = () => {
               Previous
             </button>
             <button
-              onClick={() => fetchProducts(pagination.current_page + 1)}
+              onClick={() => handlePageChange(pagination.current_page + 1)}
               disabled={pagination.current_page === pagination.last_page}
               className={`relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md ${
                 pagination.current_page === pagination.last_page
@@ -262,7 +272,7 @@ const ProductManagement = () => {
             <div>
               <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
                 <button
-                  onClick={() => fetchProducts(pagination.current_page - 1)}
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
                   disabled={pagination.current_page === 1}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md ${
                     pagination.current_page === 1
@@ -275,7 +285,7 @@ const ProductManagement = () => {
                 {[...Array(pagination.last_page)].map((_, index) => (
                   <button
                     key={index + 1}
-                    onClick={() => fetchProducts(index + 1)}
+                    onClick={() => handlePageChange(index + 1)}
                     className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
                       pagination.current_page === index + 1
                         ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
@@ -286,7 +296,7 @@ const ProductManagement = () => {
                   </button>
                 ))}
                 <button
-                  onClick={() => fetchProducts(pagination.current_page + 1)}
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
                   disabled={pagination.current_page === pagination.last_page}
                   className={`relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md ${
                     pagination.current_page === pagination.last_page

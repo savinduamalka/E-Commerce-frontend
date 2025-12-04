@@ -1,29 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Navbar from '../components/navbar';
 import { api } from '../lib/api';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { useQuery } from '@tanstack/react-query';
 
 function Category() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api.get('/categories').then((res) => res.data),
+    staleTime: 300000, // 5 minutes
+  });
 
-  const getCategory = async () => {
-    try {
-      const response = await api.get('/categories');
-      setCategories(response.data.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setError('Failed to load categories. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getCategory();
-  }, []);
+  const categories = data?.data || [];
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -40,7 +29,7 @@ function Category() {
           Categories
         </h1>
 
-        {loading && (
+        {isPending && (
           <SkeletonTheme baseColor="#202020" highlightColor="#444">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {[...Array(8)].map((_, index) => (
@@ -59,9 +48,13 @@ function Category() {
           </SkeletonTheme>
         )}
 
-        {error && <p className="text-center text-red-500">{error}</p>}
+        {isError && (
+          <p className="text-center text-red-500">
+            Failed to load categories. Please try again later.
+          </p>
+        )}
 
-        {!loading && categories.length === 0 && (
+        {!isPending && categories.length === 0 && (
           <p className="text-center text-gray-300">No categories found.</p>
         )}
 

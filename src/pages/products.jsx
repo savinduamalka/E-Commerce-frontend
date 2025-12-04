@@ -1,50 +1,39 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import { api } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 
 const Product = () => {
-  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-  const [pagination, setPagination] = useState({
-    current_page: currentPage,
-    last_page: 1,
-    per_page: 12,
-    total: 0,
+  const fetchProducts = async (page) => {
+    const response = await api.get(`/products?page=${page}`);
+    return response.data;
+  };
+
+  const { isPending, isError, error, data } = useQuery({
+    queryKey: ['products', currentPage],
+    queryFn: () => fetchProducts(currentPage),
+    placeholderData: keepPreviousData,
+    staleTime: 300000, // 5 minutes
   });
 
-  const getProducts = useCallback(async (page) => {
-    setLoading(true);
-    try {
-      const response = await api.get(`/products?page=${page}`);
-      console.log('Fetched products:', response.data);
+  const products = data?.data || [];
+  const meta = data?.meta || {};
 
-      const data = response.data.data || [];
-      const meta = response.data.meta || {};
-
-      setProducts(data);
-      setPagination({
-        current_page: meta.current_page || page,
-        last_page: meta.last_page || 1,
-        per_page: meta.per_page || 12,
-        total: meta.total || 0,
-      });
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to load products. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const pagination = {
+    current_page: meta.current_page || currentPage,
+    last_page: meta.last_page || 1,
+    per_page: meta.per_page || 12,
+    total: meta.total || 0,
+  };
 
   const addToCart = async (product) => {
     const token = localStorage.getItem('auth_token');
@@ -88,10 +77,6 @@ const Product = () => {
     }
   };
 
-  useEffect(() => {
-    getProducts(currentPage);
-  }, [currentPage, getProducts]);
-
   const formatLKR = (amount) => {
     return `LKR ${Number(amount).toFixed(1)} M`;
   };
@@ -118,7 +103,7 @@ const Product = () => {
           Vehicles
         </h1>
 
-        {loading && (
+        {isPending && (
           <SkeletonTheme baseColor="#202020" highlightColor="#444">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {[...Array(8)].map((_, index) => (
@@ -142,9 +127,13 @@ const Product = () => {
           </SkeletonTheme>
         )}
 
-        {error && <p className="text-center text-red-500">{error}</p>}
+        {isError && (
+          <p className="text-center text-red-500">
+            Failed to load products. Please try again later.
+          </p>
+        )}
 
-        {!loading && products.length === 0 && (
+        {!isPending && products.length === 0 && (
           <p className="text-center text-gray-300">No products found.</p>
         )}
 
@@ -159,7 +148,7 @@ const Product = () => {
           ))}
         </div>
 
-        {!loading && products.length > 0 && (
+        {!isPending && products.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3 mt-8 bg-gray-900 border border-gray-700 rounded-lg">
             <div className="flex justify-between flex-1 sm:hidden">
               <button
